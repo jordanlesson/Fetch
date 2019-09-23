@@ -1,0 +1,26 @@
+{
+  "name": "fetch",
+  "version": "2.1.1",
+  "description": "Discover Cute Dogs",
+  "main": "fetch",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "fetch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jordanlesson/Fetch.git"
+  },
+  "keywords": [
+    "dogs"
+  ],
+  "author": "Jordan Lesson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jordanlesson/Fetch/issues"
+  },
+  "homepage": "https://github.com/jordanlesson/Fetch#readme"
+}

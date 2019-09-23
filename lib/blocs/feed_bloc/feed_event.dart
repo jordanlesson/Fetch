@@ -1,0 +1,84 @@
+import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
+import 'package:fetch/profile.dart';
+
+@immutable
+abstract class FeedEvent extends Equatable {
+  FeedEvent([List props = const []]) : super(props);
+}
+
+class FeedEmptied extends FeedEvent {
+
+  // @override
+  // String toString() => 'Feed Emptied';
+}
+
+class FeedRanLow extends FeedEvent {
+
+  final List<Profile> dogs;
+  final List<Profile> swipedDogs;
+  final String currentUser;
+
+  FeedRanLow({@required this.dogs, @required this.swipedDogs, @required this.currentUser})
+      : super([dogs, swipedDogs, currentUser]);
+
+  // @override
+  // String toString() => 'Feed Ran Low';
+}
+
+class FeedStarted extends FeedEvent {
+
+  final String currentUser;
+
+  FeedStarted({@required this.currentUser})
+      : super([currentUser]);
+  // @override
+  // String toString() => 'Feed Loaded';
+}
+
+class ProfileLiked extends FeedEvent {
+  final List<Profile> dogs;
+  final String currentUser;
+  final List<Profile> swipedDogs;
+
+  ProfileLiked({@required this.dogs, @required this.currentUser, @required this.swipedDogs})
+      : super([dogs, swipedDogs, currentUser]);
+
+  // @override
+  // String toString() => 'Dog Liked';
+}
+
+class ProfileTreated extends FeedEvent {
+  final List<Profile> dogs;
+  final String currentUser;
+  final List<Profile> swipedDogs;
+
+  ProfileTreated({@required this.dogs, @required this.currentUser, @required this.swipedDogs})
+      : super([dogs, swipedDogs, currentUser]);
+
+  // @override
+  // String toString() => 'Dog Treated';
+}
+
+class ProfileDisliked extends FeedEvent {
+  final List<Profile> dogs;
+  final List<Profile> swipedDogs;
+
+  ProfileDisliked({@required this.dogs, @required this.swipedDogs})
+      : super([dogs, swipedDogs]);
+
+  // @override
+  // String toString() => 'Dog Disliked';
+}
+
+class FeedRewinded extends FeedEvent {
+  final List<Profile> dogs;
+  final String currentUser;
+  final List<Profile> swipedDogs;
+
+  FeedRewinded({@required this.dogs, @required this.currentUser, @required this.swipedDogs})
+      : super([dogs, swipedDogs, currentUser]);
+
+  // @override
+  // String toString() => 'Dog Treated';
+}

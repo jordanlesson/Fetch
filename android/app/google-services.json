@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "18328346647",
+    "firebase_url": "https://fetch-a65de.firebaseio.com",
+    "project_id": "fetch-a65de",
+    "storage_bucket": "fetch-a65de.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:18328346647:android:856ec55e104245cedc7c52",
+        "android_client_info": {
+          "package_name": "com.Lesson.Fetch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "18328346647-8brs6penrgh32claiargedta3lkk2a5v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMHUd1YijRxxCHMy5H-ZtQh7KisTHlYHo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "18328346647-8brs6penrgh32claiargedta3lkk2a5v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "18328346647-8nc8mekeiml0eia99mankce5tlq7qcan.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.Lesson.Fetch",
+                "app_store_id": "1345710000"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
