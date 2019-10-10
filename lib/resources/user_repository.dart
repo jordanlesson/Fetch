@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:fetch/gallery_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -228,7 +228,7 @@ class UserRepository {
 
       final Map<String, dynamic> dogInfo = preferredAccount != null
           ? dogProfiles.documents
-              .singleWhere((account) => account.documentID == preferredAccount)
+              .singleWhere((account) => account.documentID == preferredAccount, orElse: () => dogProfiles.documents.first)
               .data
           : dogProfiles.documents.first.data;
       final Profile dogProfile = Profile(

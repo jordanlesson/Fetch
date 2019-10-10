@@ -3,7 +3,7 @@ import 'package:fetch/blocs/leaderboard_bloc/bloc.dart';
 import 'package:fetch/blocs/leaderboard_bloc/leaderboard_bloc.dart';
 import 'package:fetch/pages/dog_breed_page.dart';
 import 'package:fetch/pages/profile_details_page.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:fetch/resources/dog_repository.dart';
 import 'package:fetch/transitions.dart';
 import 'package:fetch/ui/input_title.dart';
@@ -36,6 +36,12 @@ class _LeaderboardPageState extends State<LeaderboardPage> with AutomaticKeepAli
     _leaderboardBloc.dispatch(
       LeaderboardStarted(),
     );
+  }
+
+  @override
+  void dispose() { 
+    _leaderboardBloc.dispose();
+    super.dispose();
   }
 
   String _breed;

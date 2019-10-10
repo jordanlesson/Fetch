@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DogRepository {
@@ -93,42 +93,67 @@ class DogRepository {
 
       if (autoID.length == 20) {
         try {
-          final dogDocuments1 = breedFilter != null
-              ? await _firestore
-                  .collection("dogs")
-                  .where("id", isLessThanOrEqualTo: autoID.join())
-                  .where("breed", isEqualTo: breedFilter)
-                  // .where("dateOfBirth", isLessThanOrEqualTo: minDate)
-                  // .where("dateOfBirth", isGreaterThan: maxDate)
-                  .limit(25)
-                  .getDocuments()
-              : await _firestore
-                  .collection("dogs")
-                  .where("id", isLessThanOrEqualTo: autoID.join())
-                  // .where("dateOfBirth", isLessThanOrEqualTo: minDate)
-                  // .where("dateOfBirth", isGreaterThan: maxDate)
-                  .limit(25)
-                  .getDocuments();
 
-          final dogDocuments2 = breedFilter != null
-              ? await _firestore
-                  .collection("dogs")
-                  .where("id", isGreaterThan: autoID.join())
-                  .where("breed", isEqualTo: breedFilter)
-                  // .where("dateOfBirth", isLessThanOrEqualTo: minDate)
-                  // .where("dateOfBirth", isGreaterThan: maxDate)
-                  .limit(25)
-                  .getDocuments()
-              : await _firestore
-                  .collection("dogs")
-                  .where("id", isGreaterThan: autoID.join())
-                  // .where("dateOfBirth", isLessThanOrEqualTo: minDate)
-                  // .where("dateOfBirth", isGreaterThan: maxDate)
-                  .limit(25)
-                  .getDocuments();
+          final dogDocuments1 = breedFilter != null ? await _firestore
+          .collection("dogs")
+          .where("breed", isEqualTo: breedFilter)
+          .getDocuments() : await _firestore
+          .collection("dogs")
+          .getDocuments();
 
-          final dogDocuments = new List<DocumentSnapshot>.from(dogDocuments1.documents.toSet().toList() +
-              dogDocuments2.documents.toSet().toList());
+          final dogDocuments2 = new List<DocumentSnapshot>.from(dogDocuments1.documents.toSet().toList());
+
+          final dogDocuments = new List<DocumentSnapshot>();
+
+          final List<int> usedIndexes = new List<int>();
+
+          for (i = 0; i < 25; i++) {
+            final int dogLength = dogDocuments2.length;
+            final int randomIndex = Random().nextInt(dogLength);
+
+            usedIndexes.add(randomIndex);
+
+            if (usedIndexes.contains(randomIndex)) {
+              dogDocuments.add(dogDocuments2[randomIndex]);
+            }          
+          }
+
+          // final dogDocuments1 = breedFilter != null
+          //     ? await _firestore
+          //         .collection("dogs")
+          //         .where("id", isLessThanOrEqualTo: autoID.join())
+          //         .where("breed", isEqualTo: breedFilter)
+          //         // .where("dateOfBirth", isLessThanOrEqualTo: minDate)
+          //         // .where("dateOfBirth", isGreaterThan: maxDate)
+          //         .limit(25)
+          //         .getDocuments()
+          //     : await _firestore
+          //         .collection("dogs")
+          //         .where("id", isLessThanOrEqualTo: autoID.join())
+          //         // .where("dateOfBirth", isLessThanOrEqualTo: minDate)
+          //         // .where("dateOfBirth", isGreaterThan: maxDate)
+          //         .limit(25)
+          //         .getDocuments();
+
+          // final dogDocuments2 = breedFilter != null
+          //     ? await _firestore
+          //         .collection("dogs")
+          //         .where("id", isGreaterThan: autoID.join())
+          //         .where("breed", isEqualTo: breedFilter)
+          //         // .where("dateOfBirth", isLessThanOrEqualTo: minDate)
+          //         // .where("dateOfBirth", isGreaterThan: maxDate)
+          //         // .limit(25)
+          //         .getDocuments()
+          //     : await _firestore
+          //         .collection("dogs")
+          //         .where("id", isGreaterThan: autoID.join())
+          //         // .where("dateOfBirth", isLessThanOrEqualTo: minDate)
+          //         // .where("dateOfBirth", isGreaterThan: maxDate)
+          //         // .limit(25)
+          //         .getDocuments();
+
+          // final dogDocuments = new List<DocumentSnapshot>.from(dogDocuments1.documents.toSet().toList() +
+          //     dogDocuments2.documents.toSet().toList());
 
           final ageFilteredDogDocuments = new List<DocumentSnapshot>.from(dogDocuments.where((profile) => profile.data["dateOfBirth"].toDate().isAfter(maxDate) &&  profile.data["dateOfBirth"].toDate().isBefore(minDate) && profile.data["id"] != currentUser).toList());
 
@@ -206,6 +231,16 @@ class DogRepository {
       } else {
         return null;
       }
+    } catch (error) {
+      print(error);
+      return null;
+    }
+  }
+
+  void deleteDogProfile(Profile dog) async {
+    try {
+      final dogRef = _firestore.collection("dogs").document(dog.id);
+      return await dogRef.delete();
     } catch (error) {
       print(error);
       return null;

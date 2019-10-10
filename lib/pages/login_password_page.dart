@@ -1,5 +1,4 @@
 import 'package:fetch/blocs/login_bloc/bloc.dart';
-import 'package:fetch/resources/notification_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:fetch/ui/text_action_button.dart';
 import 'package:flutter/cupertino.dart';
@@ -27,7 +26,6 @@ class _LoginPasswordPageState extends State<LoginPasswordPage> {
   TextEditingController _passwordTextController;
 
   final UserRepository _userRepository = UserRepository();
-  final NotificationRepository _notificationRepository = NotificationRepository();
 
   LoginBloc _loginBloc;
 
@@ -39,7 +37,6 @@ class _LoginPasswordPageState extends State<LoginPasswordPage> {
 
     _loginBloc = LoginBloc(
       userRepository: _userRepository,
-      notificationRepository: _notificationRepository,
     );
 
     _passwordTextController = TextEditingController()

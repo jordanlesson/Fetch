@@ -14,7 +14,7 @@ class SideMenuButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return new GestureDetector(
       child: new Container(
-        height: 60.0,
+        height: 65.0,
         padding: EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: Colors.white,

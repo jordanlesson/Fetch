@@ -13,8 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:fetch/ui/horizontal_divider.dart';
 import 'package:fetch/ui/message_cell.dart';
 import 'package:fetch/conversation.dart';
-import 'package:fetch/message.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/message.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 

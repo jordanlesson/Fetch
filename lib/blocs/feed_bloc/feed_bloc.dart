@@ -4,7 +4,7 @@ import 'package:fetch/resources/user_repository.dart';
 import 'package:flutter/widgets.dart';
 import './bloc.dart';
 import 'package:fetch/resources/dog_repository.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 
 class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final DogRepository _dogRepository;

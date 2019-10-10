@@ -84,8 +84,17 @@ class Profile {
       });
 
   String convertDate(DateTime date) {
-    Duration timeDifference = date.difference(DateTime.now()).abs();
-    int age = (timeDifference.inDays / 365).floor();
+    final Duration timeDifference = date.difference(DateTime.now()).abs();
+    final int age = (timeDifference.inDays / 365).floor();
+    if (age == 0) {
+      final monthAge = timeDifference.inDays / 365;
+      final month = (monthAge * 12).floor();
+      if (month <= 2) {
+        final weeks = (monthAge % 7).ceil();
+        return weeks > 1 ? "${weeks.toString()} Weeks" : "${weeks.toString()} Week";
+      }
+      return "${month.toString()} Months";
+    }
     return age.toString();
   }
 }

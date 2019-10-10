@@ -4,20 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:fetch/blocs/authentication_bloc/bloc.dart';
 import 'package:fetch/resources/user_repository.dart';
-import 'package:fetch/resources/notification_repository.dart';
 
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   final UserRepository _userRepository;
-  final NotificationRepository _notificationRepository;
 
   AuthenticationBloc(
-      {@required UserRepository userRepository,
-      @required NotificationRepository notificationRepository})
+      {@required UserRepository userRepository})
       : assert(userRepository != null),
-        assert(notificationRepository != null),
-        _userRepository = userRepository,
-        _notificationRepository = notificationRepository;
+        _userRepository = userRepository;
 
   @override
   AuthenticationState get initialState => Uninitialized();

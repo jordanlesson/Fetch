@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fetch/photos.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 
 class ProfileView extends StatefulWidget {
 

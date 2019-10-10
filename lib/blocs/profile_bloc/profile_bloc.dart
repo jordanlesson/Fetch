@@ -3,7 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import './bloc.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:fetch/resources/user_repository.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {

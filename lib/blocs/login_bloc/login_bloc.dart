@@ -6,20 +6,15 @@ import 'package:rxdart/rxdart.dart';
 import 'package:fetch/blocs/login_bloc/login_event.dart';
 import 'package:fetch/blocs/login_bloc/login_state.dart';
 import 'package:fetch/resources/user_repository.dart';
-import 'package:fetch/resources/notification_repository.dart';
 import 'package:fetch/utils/validators.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   UserRepository _userRepository;
-  NotificationRepository _notificationRepository;
 
   LoginBloc({
     @required UserRepository userRepository,
-    @required NotificationRepository notificationRepository,
   })  : assert(userRepository != null),
-        assert(notificationRepository != null),
-        _userRepository = userRepository,
-        _notificationRepository = notificationRepository;
+        _userRepository = userRepository;
 
   @override
   LoginState get initialState => LoginState.empty();
@@ -95,7 +90,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         yield currentState.success(
           user: user,
         );
-        //_notificationRepository.initializeNotifications(context, user.uid);
       }
     } catch (_) {
       yield LoginState.failure();

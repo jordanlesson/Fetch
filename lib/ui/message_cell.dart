@@ -1,7 +1,7 @@
 import 'package:fetch/pages/photo_viewer_page.dart';
 import 'package:fetch/transitions.dart';
 import 'package:flutter/material.dart';
-import 'package:fetch/message.dart';
+import 'package:fetch/models/message.dart';
 
 class MessageCell extends StatelessWidget {
   final String currentDog;

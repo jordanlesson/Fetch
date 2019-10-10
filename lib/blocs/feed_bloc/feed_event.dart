@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 
 @immutable
 abstract class FeedEvent extends Equatable {

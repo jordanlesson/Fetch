@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fetch/conversation.dart';
 import 'package:intl/intl.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 
 class ConversationCell extends StatefulWidget {
   @override

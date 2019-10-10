@@ -1,4 +1,4 @@
-import 'message.dart';
+import 'package:fetch/models/message.dart';
 
 class Conversation {
   final List<dynamic> users;

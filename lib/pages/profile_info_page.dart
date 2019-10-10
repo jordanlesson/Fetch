@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:camera/camera.dart';
+import 'package:fetch/pages/photo_capture_page.dart';
 import 'package:fetch/pages/profile_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +13,7 @@ import 'package:fetch/ui/tab_bar_item.dart';
 import 'package:fetch/ui/profile_info_input.dart';
 import 'package:fetch/ui/input_title.dart';
 import 'package:fetch/ui/profile_photo_card.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:fetch/cards.dart';
 import 'package:fetch/gallery_image.dart';
 import 'package:fetch/transitions.dart';
@@ -265,6 +267,7 @@ class ProfileEditPage extends StatefulWidget {
 
 class _ProfileEditPageState extends State<ProfileEditPage> {
   List<Uint8List> photos;
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   void initState() {
@@ -450,32 +453,94 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           ),
         );
       },
-    ).then((index) {
+    ).then((index) async {
       SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
 
       if (index != null) {
-        Future.delayed(Duration(milliseconds: 200), () async {
-          final photoFile = await ImagePicker.pickImage(
-              source: index == 0 ? ImageSource.camera : ImageSource.gallery,
-              maxWidth: 1024,
-              maxHeight: 1024);
-          if (photoFile != null) {
-            final photoBytes = await photoFile.readAsBytes();
-            final photo = new Uint8List.fromList(photoBytes);
-            _onPhotoSelected(GalleryImage(bytes: photo), photoIndex);
-          }
-          // else if (index == 1) {
-          //   Navigator.of(context)
-          //       .push(
-          //         SlideUpRoute(
-          //           page: PhotoGalleryPage(),
-          //         ),
-          //       )
-          //       .then((photo) => _onPhotoSelected(photo, photoIndex));
-          // }
-        });
+        Future.delayed(
+          Duration(milliseconds: 200),
+          () async {
+            File photoFile;
+
+            if (index == 0) {
+              final cameras = await availableCameras();
+
+              Navigator.of(context)
+                  .push(
+                SlideUpRoute(
+                  page: PhotoCapturePage(
+                    camera: cameras.first,
+                  ),
+                ),
+              )
+                  .then((photoPath) async {
+                if (photoPath != null) {
+                  photoFile = File(photoPath);
+
+                  if (photoFile != null) {
+                    final photoBytes = await photoFile.readAsBytes();
+                    final decodedPhoto = await decodeImageFromList(photoBytes);
+                    print("height: ${decodedPhoto.height}");
+                    print("width: ${decodedPhoto.width}");
+                    if (decodedPhoto.height * decodedPhoto.width <=
+                        2048 * 2048) {
+                      final photo = new Uint8List.fromList(photoBytes);
+                      _onPhotoSelected(GalleryImage(bytes: photo), photoIndex);
+                    } else {
+                      _scaffoldKey.currentState.showSnackBar(
+                        _buildUploadError(),
+                      );
+                    }
+                  }
+                }
+              });
+            } else {
+              photoFile = await ImagePicker.pickImage(
+                  source: ImageSource.gallery,
+                  maxHeight: 640.0,
+                  maxWidth: 480.0);
+            }
+            if (photoFile != null) {
+              final photoBytes = await photoFile.readAsBytes();
+              final decodedPhoto = await decodeImageFromList(photoBytes);
+              print("height: ${decodedPhoto.height}");
+              print("width: ${decodedPhoto.width}");
+              if (decodedPhoto.height * decodedPhoto.width <= 2048 * 2048) {
+                final photo = new Uint8List.fromList(photoBytes);
+                _onPhotoSelected(GalleryImage(bytes: photo), photoIndex);
+              } else {
+                _scaffoldKey.currentState.showSnackBar(
+                  _buildUploadError(),
+                );
+              }
+            }
+          },
+        );
       }
     });
+  }
+
+  Widget _buildUploadError() {
+    return new SnackBar(
+      backgroundColor: Colors.red,
+      content: new Container(
+        height: 30.0,
+        alignment: Alignment.center,
+        padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 0.0),
+        child: new Text(
+          "Photo size must be less than 2048 x 2048",
+          maxLines: null,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 15.0,
+            fontFamily: "Proxima Nova",
+            fontWeight: FontWeight.w600,
+            height: 1.5,
+          ),
+        ),
+      ),
+    );
   }
 
   void _handlePhoto(int photoIndex) {
@@ -520,36 +585,39 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   @override
   Widget build(BuildContext context) {
     return new Expanded(
-      child: new ListView(
-        padding: EdgeInsets.only(bottom: 50.0),
-        children: <Widget>[
-          _buildPhotoGrid(),
-          ProfileInfoInput(
-            initialText: widget.profile.bio,
-            hintText: "",
-            labelText: "ABOUT MY DOG",
-            maxHeight: 350.0,
-            maxLength: 500,
-            maxLines: null,
-            onTextChanged: widget.onBioChanged,
-          ),
-          ProfileInfoOptionsButton(
-            labelText: "HOBBIES",
-            hintText: "Select Your Dog's Favorite Hobby",
-            hobby: widget.hobby,
-            onPressed: () {
-              Navigator.of(context)
-                  .push(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => new HobbyInfoPage(
-                        hobby: widget.hobby,
+      child: new Scaffold(
+        key: _scaffoldKey,
+        body: new ListView(
+          padding: EdgeInsets.only(bottom: 50.0),
+          children: <Widget>[
+            _buildPhotoGrid(),
+            ProfileInfoInput(
+              initialText: widget.profile.bio,
+              hintText: "",
+              labelText: "ABOUT MY DOG",
+              maxHeight: 350.0,
+              maxLength: 500,
+              maxLines: null,
+              onTextChanged: widget.onBioChanged,
+            ),
+            ProfileInfoOptionsButton(
+              labelText: "HOBBIES",
+              hintText: "Select Your Dog's Favorite Hobby",
+              hobby: widget.hobby,
+              onPressed: () {
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => new HobbyInfoPage(
+                          hobby: widget.hobby,
+                        ),
                       ),
-                    ),
-                  )
-                  .then((hobby) => widget.onHobbyChanged(hobby));
-            },
-          ),
-        ],
+                    )
+                    .then((hobby) => widget.onHobbyChanged(hobby));
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

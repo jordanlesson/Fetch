@@ -3,8 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
-
-import '../../profile.dart';
+import 'package:fetch/models/profile.dart';
 
 @immutable
 abstract class SignUpEvent extends Equatable {

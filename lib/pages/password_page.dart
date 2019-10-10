@@ -1,7 +1,5 @@
 import 'dart:typed_data';
-
-import 'package:fetch/profile.dart';
-import 'package:fetch/resources/notification_repository.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:fetch/ui/text_action_button.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +9,6 @@ import 'home_page.dart';
 import 'package:fetch/transitions.dart';
 import 'package:fetch/resources/user_repository.dart';
 import 'package:fetch/blocs/sign_up_bloc/bloc.dart';
-
 import 'master_page.dart';
 
 class PasswordPage extends StatefulWidget {
@@ -40,7 +37,6 @@ class _PasswordPageState extends State<PasswordPage> {
   bool _isHidden;
 
   final UserRepository _userRepository = new UserRepository();
-  final NotificationRepository _notificationRepository = NotificationRepository();
 
   SignUpBloc _signUpBloc;
 
@@ -55,7 +51,6 @@ class _PasswordPageState extends State<PasswordPage> {
 
     _signUpBloc = SignUpBloc(
       userRepository: _userRepository,
-      notificationRepository: _notificationRepository,
     );
   }
 

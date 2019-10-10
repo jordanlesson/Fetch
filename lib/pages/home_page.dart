@@ -1,11 +1,10 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fetch/blocs/profile_bloc/bloc.dart';
 import 'package:fetch/pages/leaderboard_page.dart';
 import 'package:fetch/pages/onboarding_page.dart';
 import 'package:fetch/pages/settings_page.dart';
-import 'package:fetch/resources/notification_repository.dart';
+import 'package:fetch/pages/store_page.dart';
 import 'package:fetch/resources/user_repository.dart';
 import 'package:fetch/transitions.dart';
 import 'package:fetch/ui/horizontal_divider.dart';
@@ -16,11 +15,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:fetch/ui/round_icon_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'bugs_page.dart';
+import 'memes_page.dart';
 import 'profile_page.dart';
 import 'conversations_page.dart';
 import 'package:fetch/matches.dart';
 import 'package:fetch/cards.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fetch/resources/dog_repository.dart';
 import 'package:fetch/blocs/feed_bloc/bloc.dart';
@@ -45,8 +46,6 @@ class _HomePageState extends State<HomePage>
     with AutomaticKeepAliveClientMixin {
   final DogRepository _dogRepository = DogRepository();
   final UserRepository _userRepository = UserRepository();
-  final NotificationRepository _notificationRepository =
-      NotificationRepository();
   FeedBloc _feedBloc;
   ProfileBloc _profileBloc;
   List<Profile> _dogProfiles;
@@ -62,6 +61,7 @@ class _HomePageState extends State<HomePage>
     "Be sure to create a bio where you can give a brief description of your dog",
     "Remember to add your dog's favorite hobby onto its profile",
   ];
+
   int tipIndex;
 
   @override
@@ -247,7 +247,7 @@ class _HomePageState extends State<HomePage>
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             new ProfileHeader(
-                dog: state.dogProfile, profileImage: state.profileImage),
+                dog: state.dogProfile, profileImage: state.profileImage, user: widget.user,),
             new Expanded(
               flex: 2,
               child: new ListView(
@@ -299,10 +299,37 @@ class _HomePageState extends State<HomePage>
                     },
                   ),
                   // SideMenuButton(
+                  //   text: "Memes",
+                  //   icon: Icons.card_membership, // Get Doge Icon
+                  //   onPressed: () {
+                  //     Navigator.of(context).pop();
+                  //     Navigator.of(context).push(
+                  //       SlideLeftRoute(
+                  //         page: new MemesPage(
+                  //           user: widget.user,
+                  //         ),
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
+                  // SideMenuButton(
                   //   text: "Store",
                   //   icon: Icons.local_grocery_store,
-                  //   onPressed: null,
+                  //   onPressed: () {
+                  //     Navigator.of(context).pop();
+                  //     Navigator.of(context).push(
+                  //       SlideLeftRoute(
+                  //         page: new StorePage(
+                  //           user: widget.user,
+                  //         ),
+                  //       ),
+                  //     );
+                  //   },
                   // ),
+                  new Container(
+                    height: 1.0,
+                    color: Colors.black12,
+                  ),
                   SideMenuButton(
                     text: "Settings",
                     icon: Icons.settings,
@@ -313,6 +340,28 @@ class _HomePageState extends State<HomePage>
                           page: new SettingsPage(
                             user: widget.user,
                             dog: currentUser,
+                          ),
+                        ),
+                      ).then((refresh) {
+                        if (refresh) {
+                          _feedBloc.dispatch(
+                            FeedStarted(
+                              currentUser: widget.user.uid,
+                            )
+                          );
+                        }
+                      });
+                    },
+                  ),
+                  
+                  new SideMenuButton(
+                    text: "Report a bug",
+                    icon: Icons.bug_report,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        SlideUpRoute(
+                          page: BugsPage(
+                            user: widget.user,
                           ),
                         ),
                       );
@@ -655,79 +704,81 @@ class _HomePageState extends State<HomePage>
     return new BlocProvider(
       bloc: _profileBloc,
       child: new BlocBuilder(
-        bloc: _profileBloc,
+          bloc: _profileBloc,
           builder: (BuildContext context, ProfileState profileState) {
-        return new Scaffold(
-          key: _scaffoldKey,
-          drawer: profileState.isEmpty ? null : _buildSideMenu(profileState),
-          body: Column(
-            children: <Widget>[
-              new Expanded(
-                child: new BlocProvider(
-                  bloc: _feedBloc,
-                  child: new BlocListener(
-                    bloc: _feedBloc,
-                    listener: (BuildContext context, FeedState state) async {
-                      _dogProfiles = List.from(state.dogs);
-                      _swipedDogs = List.from(state.swipedDogs);
-                      if (state.dogs.length == 5) {
-                        _feedBloc.dispatch(
-                          FeedRanLow(
-                            currentUser: widget.user.uid,
-                            dogs: state.dogs,
-                            swipedDogs: state.swipedDogs,
-                          ),
-                        );
-                      }
-                      if (state.swipedDogs.length % 15 == 0 &&
-                          state.swipedDogs.isNotEmpty) {
-                        AdmobInterstitial feedInterstitialAd;
-                        feedInterstitialAd = AdmobInterstitial(
-                          adUnitId: "ca-app-pub-7132470146221772/4532985304",
-                          listener:
-                              (AdmobAdEvent event, Map<String, dynamic> args) {
-                            if (event == AdmobAdEvent.loaded) {
-                              feedInterstitialAd.show();
-                            }
-                            if (event == AdmobAdEvent.closed) {
-                              feedInterstitialAd.dispose();
-                            }
-                            if (event == AdmobAdEvent.failedToLoad) {
-                              // Start hoping they didn't just ban your account :)
-                              print("Error code: ${args['errorCode']}");
-                            }
-                          },
-                        );
-                        feedInterstitialAd.load();
-                      }
-                    },
-                    child: new BlocBuilder(
+            return new Scaffold(
+              key: _scaffoldKey,
+              drawer: _buildSideMenu(profileState),
+              body: Column(
+                children: <Widget>[
+                  new Expanded(
+                    child: new BlocProvider(
                       bloc: _feedBloc,
-                      builder: (BuildContext context, FeedState feedState) {
-                        return new Scaffold(
-                          //key: _scaffoldKey,
-                          backgroundColor: Colors.white,
-                          //drawer: _buildSideMenu(profileState),
-                          body: new Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              _buildAppBar(context),
-                              new Expanded(
-                                child: _buildCard(feedState),
+                      child: new BlocListener(
+                        bloc: _feedBloc,
+                        listener:
+                            (BuildContext context, FeedState state) async {
+                          _dogProfiles = List.from(state.dogs);
+                          _swipedDogs = List.from(state.swipedDogs);
+                          if (state.dogs.length == 5) {
+                            _feedBloc.dispatch(
+                              FeedRanLow(
+                                currentUser: widget.user.uid,
+                                dogs: state.dogs,
+                                swipedDogs: state.swipedDogs,
                               ),
-                            ],
-                          ),
-                        );
-                      },
+                            );
+                          }
+                          if (state.swipedDogs.length % 15 == 0 &&
+                              state.swipedDogs.isNotEmpty) {
+                            AdmobInterstitial feedInterstitialAd;
+                            feedInterstitialAd = AdmobInterstitial(
+                              adUnitId:
+                                  "ca-app-pub-7132470146221772/4532985304",
+                              listener: (AdmobAdEvent event,
+                                  Map<String, dynamic> args) {
+                                if (event == AdmobAdEvent.loaded) {
+                                  feedInterstitialAd.show();
+                                }
+                                if (event == AdmobAdEvent.closed) {
+                                  feedInterstitialAd.dispose();
+                                }
+                                if (event == AdmobAdEvent.failedToLoad) {
+                                  // Start hoping they didn't just ban your account :)
+                                  print("Error code: ${args['errorCode']}");
+                                }
+                              },
+                            );
+                            feedInterstitialAd.load();
+                          }
+                        },
+                        child: new BlocBuilder(
+                          bloc: _feedBloc,
+                          builder: (BuildContext context, FeedState feedState) {
+                            return new Scaffold(
+                              //key: _scaffoldKey,
+                              backgroundColor: Colors.white,
+                              //drawer: _buildSideMenu(profileState),
+                              body: new Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  _buildAppBar(context),
+                                  new Expanded(
+                                    child: _buildCard(feedState),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  _buildBottomBar(),
+                ],
               ),
-              _buildBottomBar(),
-            ],
-          ),
-        );
-      }),
+            );
+          }),
     );
   }
 }

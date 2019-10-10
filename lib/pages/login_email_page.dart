@@ -1,4 +1,3 @@
-import 'package:fetch/resources/notification_repository.dart';
 import 'package:fetch/resources/user_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:fetch/ui/text_action_button.dart';
@@ -9,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fetch/resources/user_repository.dart';
 import 'package:fetch/resources/dog_repository.dart';
 import 'package:fetch/blocs/login_bloc/bloc.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 
 class LoginEmailPage extends StatefulWidget {
   @override
@@ -20,7 +19,6 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   TextEditingController _emailTextController;
 
   final UserRepository _userRepository = UserRepository();
-  final NotificationRepository _notificationRepository = NotificationRepository();
 
   LoginBloc _loginBloc;
 
@@ -30,7 +28,6 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
 
     _loginBloc = LoginBloc(
       userRepository: _userRepository,
-      notificationRepository: _notificationRepository,
     );
 
     _emailTextController = TextEditingController()

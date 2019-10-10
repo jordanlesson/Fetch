@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:fetch/blocs/sign_up_bloc/bloc.dart';
 import 'package:fetch/pages/profile_page.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:fetch/resources/user_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

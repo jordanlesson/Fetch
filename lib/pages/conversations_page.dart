@@ -1,4 +1,4 @@
-import 'package:fetch/message.dart';
+import 'package:fetch/models/message.dart';
 import 'package:flutter/material.dart';
 import 'messages_page.dart';
 import 'package:fetch/conversation.dart';
@@ -6,7 +6,7 @@ import 'package:fetch/ui/conversation_cell.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fetch/resources/user_repository.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 
 class ConversationsPage extends StatefulWidget {
   final VoidCallback previousPage;

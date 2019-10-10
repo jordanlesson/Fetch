@@ -12,6 +12,7 @@ class ProfileInfoInput extends StatefulWidget {
   final int maxLines;
   final double maxHeight;
   final void Function(String) onTextChanged;
+  final bool autoFocus;
 
   ProfileInfoInput({
     this.initialText,
@@ -21,6 +22,7 @@ class ProfileInfoInput extends StatefulWidget {
     this.maxLines,
     this.maxHeight,
     this.onTextChanged,
+    this.autoFocus,
   });
 }
 
@@ -42,6 +44,7 @@ class _ProfileInfoInputState extends State<ProfileInfoInput> {
       padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
       constraints: BoxConstraints(maxHeight: widget.maxHeight),
       child: new TextField(
+        autofocus: widget.autoFocus != null ? widget.autoFocus : false,
         maxLength: widget.maxLength,
         maxLines: widget.maxLines,
         keyboardAppearance: Brightness.light,

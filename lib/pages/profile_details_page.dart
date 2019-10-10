@@ -3,7 +3,7 @@ import 'package:fetch/pages/messages_page.dart';
 import 'package:fetch/pages/profile_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:fetch/matches.dart';
 import 'package:fetch/ui/subtitle_label.dart';
 import 'package:fetch/ui/round_icon_button.dart';
@@ -164,7 +164,8 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                           color: Colors.black.withOpacity(0.80),
                           fontSize: 35.0,
                           fontFamily: "Proxima Nova",
-                          fontWeight: FontWeight.w700),
+                          fontWeight: FontWeight.w700,
+                          ),
                     ),
                     new TextSpan(
                       text: " ",

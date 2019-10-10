@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'profile.dart';
+import 'package:fetch/models/profile.dart';
 
 class MatchEngine extends ChangeNotifier {
   final List<DogMatch> _matches;

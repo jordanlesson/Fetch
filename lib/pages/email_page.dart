@@ -1,8 +1,6 @@
 import 'dart:typed_data';
-
 import 'package:fetch/blocs/login_bloc/login_event.dart' as prefix0;
 import 'package:fetch/pages/password_page.dart';
-import 'package:fetch/resources/notification_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:fetch/ui/text_action_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,7 +31,6 @@ class _EmailPageState extends State<EmailPage> {
   TextEditingController emailTextController;
 
   final UserRepository _userRepository = new UserRepository();
-  final NotificationRepository _notificationRepository = new NotificationRepository();
 
   SignUpBloc _signUpBloc;
 
@@ -45,7 +42,6 @@ class _EmailPageState extends State<EmailPage> {
 
     _signUpBloc = SignUpBloc(
       userRepository: _userRepository,
-      notificationRepository: _notificationRepository,
     );
 
     emailTextController = TextEditingController()..addListener(_onEmailChanged);

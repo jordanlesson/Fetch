@@ -9,22 +9,16 @@ import 'package:rxdart/rxdart.dart';
 import 'package:fetch/blocs/sign_up_bloc/sign_up_event.dart';
 import 'package:fetch/blocs/sign_up_bloc/sign_up_state.dart';
 import 'package:fetch/resources/user_repository.dart';
-import 'package:fetch/resources/notification_repository.dart';
 import 'package:fetch/utils/validators.dart';
-
-import '../../profile.dart';
+import 'package:fetch/models/profile.dart';
 
 class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   final UserRepository _userRepository;
-  final NotificationRepository _notificationRepository;
 
   SignUpBloc(
-      {@required UserRepository userRepository,
-      NotificationRepository notificationRepository})
+      {@required UserRepository userRepository,})
       : assert(userRepository != null),
-        assert(notificationRepository != null),
-        _userRepository = userRepository,
-        _notificationRepository = notificationRepository;
+        _userRepository = userRepository;
 
   @override
   SignUpState get initialState => SignUpState.empty();
@@ -149,7 +143,6 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
           userInfo: newUser, dogInfo: dogInfo);
       if (userInitialized) {
         yield currentState.success(user: newUser);
-        //_notificationRepository.initializeNotifications(context, newUser.uid);
       } else {
         yield SignUpState.failure();
       }

@@ -4,7 +4,7 @@ import 'package:fetch/ui/login_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fetch/ui/round_profile_button.dart';
 import 'package:fetch/ui/profile_view.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:fetch/transitions.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -211,8 +211,8 @@ class _ProfilePageState extends State<ProfilePage>
         style: TextStyle(
           color: Colors.black54,
           fontSize: 14.0,
-          fontFamily: "Gotham Rounded",
-          fontWeight: FontWeight.w100,
+          fontFamily: "Proxima Nova",
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -443,20 +443,24 @@ class _ProfilePageState extends State<ProfilePage>
           ? Firestore.instance
               .collection("dogs")
               .where("likes", arrayContains: widget.user.uid)
-              .orderBy("treats", descending: true)
+              .orderBy("treatCount", descending: true)
               .snapshots()
           : Firestore.instance
               .collection("dogs")
               .where("treats", arrayContains: widget.user.uid)
-              .orderBy("treats", descending: true)
+              .orderBy("treatCount", descending: true)
               .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasData) {
+
+          List<DocumentSnapshot> dogs = List.from(snapshot.data.documents.where((dog) => dog.exists));
+          
           return new SliverPadding(
             padding: EdgeInsets.only(bottom: 16.0),
             sliver: new SliverList(
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
+
                   return new Container(
                     height: 450.0,
                     color: Colors.white,
@@ -468,33 +472,21 @@ class _ProfilePageState extends State<ProfilePage>
                             children: <Widget>[
                               new ProfileView(
                                 profile: Profile(
-                                  name: snapshot.data.documents[index]["name"],
-                                  id: snapshot.data.documents[index].data["id"],
-                                  dateOfBirth: snapshot
-                                      .data.documents[index].data["dateOfBirth"]
+                                  name: dogs[index].data["name"],
+                                  id: dogs[index].data["id"],
+                                  dateOfBirth: dogs[index].data["dateOfBirth"]
                                       .toDate(),
-                                  breed: snapshot
-                                      .data.documents[index].data["breed"],
-                                  bio: snapshot
-                                      .data.documents[index].data["bio"],
-                                  gender: snapshot
-                                      .data.documents[index].data["gender"],
-                                  hobby: snapshot
-                                      .data.documents[index].data["hobby"],
-                                  owner: snapshot
-                                      .data.documents[index].data["owner"],
-                                  photos: snapshot
-                                      .data.documents[index].data["photos"],
-                                  photoPaths: snapshot
-                                      .data.documents[index].data["photoPaths"],
-                                  treats: snapshot
-                                      .data.documents[index].data["treats"],
-                                  likes: snapshot
-                                      .data.documents[index].data["likes"],
-                                  likeCount: snapshot
-                                      .data.documents[index].data["likeCount"],
-                                  treatCount: snapshot
-                                      .data.documents[index].data["treatCount"],
+                                  breed: dogs[index].data["breed"],
+                                  bio: dogs[index].data["bio"],
+                                  gender: dogs[index].data["gender"],
+                                  hobby: dogs[index].data["hobby"],
+                                  owner: dogs[index].data["owner"],
+                                  photos: dogs[index].data["photos"],
+                                  photoPaths: dogs[index].data["photoPaths"],
+                                  treats: dogs[index].data["treats"],
+                                  likes: dogs[index].data["likes"],
+                                  likeCount: dogs[index].data["likeCount"],
+                                  treatCount: dogs[index].data["treatCount"],
                                 ),
                               ),
                             ],
@@ -531,42 +523,33 @@ class _ProfilePageState extends State<ProfilePage>
                                         currentUser: widget.user.uid,
                                         currentDog: dogProfile,
                                         profile: Profile(
-                                          name: snapshot.data.documents[index]
+                                          name: dogs[index].data
                                               ["name"],
-                                          id: snapshot
-                                              .data.documents[index].data["id"],
-                                          dateOfBirth: snapshot
-                                              .data
-                                              .documents[index]
+                                          id: dogs[index].data["id"],
+                                          dateOfBirth: dogs[index]
                                               .data["dateOfBirth"]
                                               .toDate(),
-                                          breed: snapshot.data.documents[index]
+                                          breed: dogs[index]
                                               .data["breed"],
-                                          bio: snapshot.data.documents[index]
+                                          bio: dogs[index]
                                               .data["bio"],
-                                          gender: snapshot.data.documents[index]
+                                          gender: dogs[index]
                                               .data["gender"],
-                                          hobby: snapshot.data.documents[index]
+                                          hobby: dogs[index]
                                               .data["hobby"],
-                                          owner: snapshot.data.documents[index]
+                                          owner: dogs[index]
                                               .data["owner"],
-                                          photos: snapshot.data.documents[index]
+                                          photos: dogs[index]
                                               .data["photos"],
-                                          photoPaths: snapshot
-                                              .data
-                                              .documents[index]
+                                          photoPaths: dogs[index]
                                               .data["photoPaths"],
-                                          treats: snapshot.data.documents[index]
+                                          treats: dogs[index]
                                               .data["treats"],
-                                          likes: snapshot.data.documents[index]
+                                          likes: dogs[index]
                                               .data["likes"],
-                                          likeCount: snapshot
-                                              .data
-                                              .documents[index]
+                                          likeCount: dogs[index]
                                               .data["likeCount"],
-                                          treatCount: snapshot
-                                              .data
-                                              .documents[index]
+                                          treatCount: dogs[index]
                                               .data["treatCount"],
                                         ),
                                         visiblePhotoIndex: 0,
@@ -576,8 +559,7 @@ class _ProfilePageState extends State<ProfilePage>
                                   )
                                       .then((delete) {
                                     if (delete != null) {
-                                      _onDeleteProfile(snapshot
-                                          .data.documents[index].documentID);
+                                      _onDeleteProfile(dogs[index].documentID);
                                     }
                                   });
                                 },
@@ -588,7 +570,7 @@ class _ProfilePageState extends State<ProfilePage>
                                     margin:
                                         EdgeInsets.only(left: 16.0, right: 5.0),
                                     child: new Text(
-                                      "${snapshot.data.documents[index].data["name"]}, ${Profile().convertDate(snapshot.data.documents[index].data["dateOfBirth"].toDate())}",
+                                      "${dogs[index].data["name"]}, ${Profile().convertDate(dogs[index].data["dateOfBirth"].toDate())}",
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontSize: 20.0,
@@ -610,7 +592,7 @@ class _ProfilePageState extends State<ProfilePage>
                                   color: Colors.black,
                                 ),
                                 onPressed: () => _showDeleteOptions(
-                                    snapshot.data.documents[index].documentID),
+                                    dogs[index].documentID),
                               ),
                             ],
                           ),
@@ -619,7 +601,7 @@ class _ProfilePageState extends State<ProfilePage>
                     ),
                   );
                 },
-                childCount: snapshot.data.documents.length,
+                childCount: dogs.length,
               ),
             ),
           );
@@ -883,7 +865,7 @@ class _ProfilePageState extends State<ProfilePage>
             return new Scaffold(
               backgroundColor: Color.fromRGBO(245, 245, 245, 1.0),
               appBar: _buildAppBar(),
-              body: dog != null || state.dogProfile != null
+              body: dog != null || state.dogProfile != null || state.isEmpty
                   ? new CustomScrollView(
                       shrinkWrap: true,
                       slivers: <Widget>[

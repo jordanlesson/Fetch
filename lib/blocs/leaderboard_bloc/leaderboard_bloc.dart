@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
-import 'package:fetch/profile.dart';
+import 'package:fetch/models/profile.dart';
 import 'package:fetch/resources/dog_repository.dart';
 import 'package:meta/meta.dart';
 import './bloc.dart';

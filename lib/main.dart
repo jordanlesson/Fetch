@@ -1,5 +1,4 @@
 import 'package:fetch/pages/home_page.dart';
-import 'package:fetch/resources/notification_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fetch/pages/master_page.dart';
@@ -29,14 +28,13 @@ class Fetch extends StatefulWidget {
 
 class _FetchState extends State<Fetch> {
   final UserRepository _userRepository = UserRepository();
-  final NotificationRepository _notificationRepository = NotificationRepository();
   
   AuthenticationBloc _authenticationBloc;
 
   @override
   void initState() {
     super.initState();
-    _authenticationBloc = AuthenticationBloc(userRepository: _userRepository, notificationRepository: _notificationRepository);
+    _authenticationBloc = AuthenticationBloc(userRepository: _userRepository);
     _authenticationBloc.dispatch(AppStarted(
       context: context
     ));

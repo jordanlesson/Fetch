@@ -4,7 +4,7 @@ import 'package:fetch/pages/profile_details_page.dart';
 import 'package:fetch/matches.dart';
 import 'package:fetch/transitions.dart';
 import 'photos.dart';
-import 'profile.dart';
+import 'package:fetch/models/profile.dart';
 import 'dart:math';
 import 'dart:async';
 import 'package:fetch/resources/dog_repository.dart';
@@ -742,6 +742,8 @@ class _ProfileCardState extends State<ProfileCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   new RichText(
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
                     text: TextSpan(
                       children: [
                         new TextSpan(
@@ -762,7 +764,10 @@ class _ProfileCardState extends State<ProfileCard> {
                         new TextSpan(
                           text:
                               Profile().convertDate(widget.profile.dateOfBirth),
+                              
+                              
                           style: TextStyle(
+                            
                             color: Colors.white,
                             fontSize: 30.0,
                             fontFamily: "Proxima Nova",

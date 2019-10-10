@@ -10,8 +10,7 @@ import 'package:fetch/ui/text_action_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fetch/resources/user_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../profile.dart';
+import 'package:fetch/models/profile.dart';
 import '../transitions.dart';
 import 'accounts_page.dart';
 import 'home_page.dart';
@@ -32,6 +31,9 @@ class _SettingsPageState extends State<SettingsPage> {
   String _breedFilter;
   String _account;
 
+  RangeValues _initialAgeRange;
+  String _initialBreedFilter;
+
   final UserRepository _userRepository = UserRepository();
 
   @override
@@ -51,10 +53,15 @@ class _SettingsPageState extends State<SettingsPage> {
         ? preferences.getDouble("maxAgeValue")
         : 30.0;
 
+    
+
     setState(() {
       _account = widget.dog != null ? widget.dog.id : null;
       _ageRange = RangeValues(minAgeValue, maxAgeValue);
       _breedFilter = preferences.get("breedFilter");
+
+      _initialAgeRange = _ageRange;
+      _initialBreedFilter = _breedFilter;
     });
   }
 
@@ -171,7 +178,9 @@ class _SettingsPageState extends State<SettingsPage> {
           color: Color.fromRGBO(0, 122, 255, 1.0),
           onPressed: () {
             _updateUserInfo();
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(
+              _initialBreedFilter != _breedFilter || _initialAgeRange != _ageRange ? true : false
+            );
           },
         ),
       ],
@@ -657,7 +666,7 @@ class _SettingsPageState extends State<SettingsPage> {
           size: 50.0,
         ),
         new Text(
-          "Version 2.1.1",
+          "Version 2.1.3",
           style: TextStyle(
             color: Colors.black87,
             fontSize: 18.0,
@@ -840,15 +849,16 @@ class _SettingsPageState extends State<SettingsPage> {
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 18.0,
-                fontFamily: "Gotham Rounded",
-                fontWeight: FontWeight.w300,
+                fontFamily: "Proxima Nova",
+                fontWeight: FontWeight.w600,
                 letterSpacing: 0.2,
                 wordSpacing: 0.1,
+                height: 1.25,
               ),
             ),
           ),
           content: new Text(
-            "You will not be able to recover your account once deleted",
+            "Your account and all of your dog's profiles will be deleted and thus unrecoverable",
             style: TextStyle(
               color: Colors.black,
               fontSize: 14.0,

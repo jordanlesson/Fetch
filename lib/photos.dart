@@ -85,17 +85,18 @@ class _PhotoBrowserState extends State<PhotoBrowser> {
 
   @override
   Widget build(BuildContext context) {
-
     return new Stack(
       fit: StackFit.expand,
       children: <Widget>[
-        widget.photos[visiblePhotoIndex] is String ? new Image.network(
-          widget.photos[visiblePhotoIndex],
-          fit: BoxFit.cover,
-        ) : new Image.memory(
-          widget.photos[visiblePhotoIndex],
-          fit: BoxFit.cover,
-        ),
+        widget.photos[visiblePhotoIndex] is String
+            ? new Image.network(
+                widget.photos[visiblePhotoIndex],
+                fit: BoxFit.cover,
+              )
+            : new Image.memory(
+                widget.photos[visiblePhotoIndex],
+                fit: BoxFit.cover,
+              ),
         new Positioned(
           top: 0.0,
           left: 0.0,
@@ -271,13 +272,15 @@ class _ProfilePhotoBrowserState extends State<ProfilePhotoBrowser> {
             return new Stack(
               fit: StackFit.expand,
               children: <Widget>[
-                widget.photos[index] is String ? new Image.network(
-                  widget.photos[index],
-                  fit: BoxFit.cover,
-                ) : new Image.memory(
-                  widget.photos[index],
-                  fit: BoxFit.cover,
-                ),
+                widget.photos[index] is String
+                    ? new Image.network(
+                        widget.photos[index],
+                        fit: BoxFit.cover,
+                      )
+                    : new Image.memory(
+                        widget.photos[index],
+                        fit: BoxFit.cover,
+                      ),
                 _buildPhotoControls()
               ],
             );
@@ -291,12 +294,13 @@ class _ProfilePhotoBrowserState extends State<ProfilePhotoBrowser> {
           left: 0.0,
           right: 0.0,
           child: new SafeArea(
-              top: true,
-              bottom: false,
-              child: new SelectedPhotoIndicator(
-                photoCount: widget.photos.length,
-                visiblePhotoIndex: visiblePhotoIndex,
-              )),
+            top: true,
+            bottom: false,
+            child: new SelectedPhotoIndicator(
+              photoCount: widget.photos.length,
+              visiblePhotoIndex: visiblePhotoIndex,
+            ),
+          ),
         ),
       ],
     );

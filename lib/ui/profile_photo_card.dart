@@ -63,7 +63,7 @@ class _ProfilePhotoCardState extends State<ProfilePhotoCard> {
   @override
   Widget build(BuildContext context) {
     return new AspectRatio(
-      aspectRatio: 9/16,
+      aspectRatio: 9.0 / 16.0,
     child: new Container(
       child: new Stack(
         alignment: Alignment.bottomRight,

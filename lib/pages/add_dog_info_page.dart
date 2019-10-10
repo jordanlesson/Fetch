@@ -203,9 +203,9 @@ class _AddDogInfoPageState extends State<AddDogInfoPage> {
           backgroundColor: Colors.white,
           itemStyle: TextStyle(
             color: Colors.black87,
-            fontFamily: "Gotham Rounded",
+            fontFamily: "Proxima Nova",
             fontSize: 20.0,
-            fontWeight: FontWeight.w100,
+            fontWeight: FontWeight.w500,
           ),
           doneStyle: TextStyle(
             color: Theme.of(context).primaryColor,
