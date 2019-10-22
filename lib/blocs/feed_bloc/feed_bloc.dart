@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:fetch/resources/user_repository.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import './bloc.dart';
 import 'package:fetch/resources/dog_repository.dart';
 import 'package:fetch/models/profile.dart';
@@ -21,19 +22,19 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     FeedEvent event,
   ) async* {
     if (event is FeedStarted) {
-      yield* _mapFeedStartedToState(event.currentUser);
+      yield* _mapFeedStartedToState(event.currentUser, event.swipedDogs, event.swipedCount);
     } else if (event is FeedEmptied) {
       yield* _mapFeedEmptiedToState();
     } else if (event is FeedRanLow) {
-      yield* _mapFeedRanLowToState(event.dogs, event.swipedDogs, event.currentUser);
+      yield* _mapFeedRanLowToState(event.dogs, event.swipedDogs, event.currentUser, event.swipedCount);
     } else if (event is ProfileLiked) {
-      yield* _mapProfileLikedToState(event.dogs, event.currentUser, event.swipedDogs);
+      yield* _mapProfileLikedToState(event.dogs, event.currentUser, event.swipedDogs, event.swipedCount);
     } else if (event is ProfileTreated) {
-      yield* _mapProfileTreatedToState(event.dogs, event.currentUser, event.swipedDogs);
+      yield* _mapProfileTreatedToState(event.dogs, event.currentUser, event.swipedDogs, event.swipedCount);
     } else if (event is ProfileDisliked) {
-      yield* _mapProfileDislikedToState(event.dogs, event.swipedDogs);
+      yield* _mapProfileDislikedToState(event.dogs, event.swipedDogs, event.swipedCount);
     } else if (event is FeedRewinded) {
-      yield* _mapFeedRewindedToState(event.dogs, event.swipedDogs, event.currentUser);
+      yield* _mapFeedRewindedToState(event.dogs, event.swipedDogs, event.currentUser, event.swipedCount);
     }
     // else if (event is FeedLoaded) {
     //   yield* _mapFeedLoadedToState(event.dogs);
@@ -46,17 +47,18 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       );
   }
 
-  Stream<FeedState> _mapFeedStartedToState(String currentUser) async* {
+  Stream<FeedState> _mapFeedStartedToState(String currentUser, List<Profile> swipedDogs, int swipedCount) async* {
     yield FeedState.initial();
-    final List<Profile> dogs = await _dogRepository.fetchDogProfiles(currentUser);
+    final List<Profile> dogs = await _dogRepository.fetchDogProfiles(currentUser, swipedDogs);
     if (dogs == null) {
       print("Feed Loading was a Failure");
       yield FeedState.failure();
     } else if (dogs.isNotEmpty) {
-      print("Dog Count: ${dogs.length}");
+
       yield currentState.notEmpty(
         dogs: dogs,
-        swipedDogs: new List<Profile>()
+        swipedDogs: new List<Profile>(),
+        swipedCount: 0,
       );
     } else if (dogs.isEmpty) {
       yield currentState.empty(
@@ -66,14 +68,16 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   }
 
   Stream<FeedState> _mapFeedRanLowToState(
-      List<Profile> dogProfiles, List<Profile> swipedDogs, String currentUser) async* {
+      List<Profile> dogProfiles, List<Profile> swipedDogs, String currentUser, int swipedCount) async* {
     try {
-      final List<Profile> dogsAdded = await _dogRepository.fetchDogProfiles(currentUser);
+      final List<Profile> dogsAdded = await _dogRepository.fetchDogProfiles(currentUser, swipedDogs);
       if (dogsAdded.isNotEmpty) {
         List<Profile> dogs = (dogProfiles + dogsAdded).toSet().toList();
         yield currentState.notEmpty(
           dogs: dogs,
           swipedDogs: swipedDogs,
+          swipedCount: swipedCount,
+
         );
       } else {
         yield currentState.empty(
@@ -86,7 +90,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   }
 
   Stream<FeedState> _mapProfileLikedToState(List<Profile> dogProfiles,
-      String currentUser, List<Profile> swipedDogs) async* {
+      String currentUser, List<Profile> swipedDogs, int swipedCount) async* {
     try {
       final dog = dogProfiles.first;
       List<Profile> swipedDogProfiles = new List<Profile>.from(swipedDogs);
@@ -97,6 +101,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         yield currentState.notEmpty(
           dogs: dogProfiles,
           swipedDogs: swipedDogProfiles,
+          swipedCount: swipedCount++,
         );
       } else {
         yield currentState.empty(
@@ -111,7 +116,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   }
 
   Stream<FeedState> _mapProfileTreatedToState(List<Profile> dogProfiles,
-      String currentUser, List<Profile> swipedDogs) async* {
+      String currentUser, List<Profile> swipedDogs, int swipedCount) async* {
     try {
       final dog = dogProfiles[0];
       List<Profile> swipedDogProfiles = new List<Profile>.from(swipedDogs);
@@ -122,6 +127,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         yield currentState.notEmpty(
           dogs: dogProfiles,
           swipedDogs: swipedDogProfiles,
+          swipedCount: swipedCount++,
         );
       } else {
         yield currentState.empty(
@@ -135,17 +141,19 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   }
 
   Stream<FeedState> _mapProfileDislikedToState(
-      List<Profile> dogProfiles, List<Profile> swipedDogs) async* {
-    final dog = dogProfiles[0];
+      List<Profile> dogProfiles, List<Profile> swipedDogs, int swipedCount) async* {
+    final dog = dogProfiles.first;
+
     List<Profile> swipedDogProfiles = new List<Profile>.from(swipedDogs);
     swipedDogProfiles.add(dog);
-    print("SWIPED DOG COUNT: ${swipedDogProfiles.length}");
+
     dogProfiles.removeAt(0);
 
     if (dogProfiles.isNotEmpty) {
       yield currentState.notEmpty(
         dogs: dogProfiles,
         swipedDogs: swipedDogProfiles,
+        swipedCount: swipedCount++,
       );
     } else {
       yield currentState.empty(
@@ -154,10 +162,10 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     }
   }
 
-  Stream<FeedState> _mapFeedRewindedToState(List<Profile> dogs, List<Profile> swipedDogs, String currentUser) async* {
+  Stream<FeedState> _mapFeedRewindedToState(List<Profile> dogs, List<Profile> swipedDogs, String currentUser, int swipedCount) async* {
     try {
       await _dogRepository.rewindDogProfile(currentUser, swipedDogs.first);
-      
+
       List<Profile> dogProfiles = new List<Profile>.from(dogs);
       List<Profile> swipedDogProfiles = new List<Profile>.from(swipedDogs);
       final Profile rewindedDog = swipedDogProfiles.removeLast();
@@ -167,6 +175,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       yield currentState.notEmpty(
         dogs: dogProfiles,
         swipedDogs: swipedDogProfiles,
+        swipedCount: swipedCount++,
       );
       
     } catch (error) {

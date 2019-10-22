@@ -19,7 +19,8 @@ class DogRepository {
         final List<String> likes = List.from(dog.data["likes"]);
         likes.add(currentUser);
         final likeCount = likes.length;
-        return await tx.update(dogReference, {"likes": likes, "likeCount": likeCount});
+        return await tx
+            .update(dogReference, {"likes": likes, "likeCount": likeCount});
       }
     });
   }
@@ -32,7 +33,8 @@ class DogRepository {
         final List<String> treats = List.from(dog.data["treats"]);
         treats.add(currentUser);
         final treatCount = treats.length;
-        return await tx.update(dogReference, {"treats": treats, "treatCount": treatCount});
+        return await tx
+            .update(dogReference, {"treats": treats, "treatCount": treatCount});
       }
     });
   }
@@ -61,7 +63,8 @@ class DogRepository {
     });
   }
 
-  Future<List<Profile>> fetchDogProfiles(String currentUser) async {
+  Future<List<Profile>> fetchDogProfiles(
+      String currentUser, List<Profile> swipedDogs) async {
     final String letters =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -93,15 +96,15 @@ class DogRepository {
 
       if (autoID.length == 20) {
         try {
+          final dogDocuments1 = breedFilter != null
+              ? await _firestore
+                  .collection("dogs")
+                  .where("breed", isEqualTo: breedFilter)
+                  .getDocuments()
+              : await _firestore.collection("dogs").getDocuments();
 
-          final dogDocuments1 = breedFilter != null ? await _firestore
-          .collection("dogs")
-          .where("breed", isEqualTo: breedFilter)
-          .getDocuments() : await _firestore
-          .collection("dogs")
-          .getDocuments();
-
-          final dogDocuments2 = new List<DocumentSnapshot>.from(dogDocuments1.documents.toSet().toList());
+          final dogDocuments2 = new List<DocumentSnapshot>.from(
+              dogDocuments1.documents.toSet().toList());
 
           final dogDocuments = new List<DocumentSnapshot>();
 
@@ -111,11 +114,12 @@ class DogRepository {
             final int dogLength = dogDocuments2.length;
             final int randomIndex = Random().nextInt(dogLength);
 
-            usedIndexes.add(randomIndex);
+            final pastDogs = List.from(swipedDogs.where((dog) => dog.id == dogDocuments2[randomIndex].data["id"]));
 
-            if (usedIndexes.contains(randomIndex)) {
+            if (!usedIndexes.contains(randomIndex) && pastDogs.isEmpty) {
+              usedIndexes.add(randomIndex);
               dogDocuments.add(dogDocuments2[randomIndex]);
-            }          
+            }
           }
 
           // final dogDocuments1 = breedFilter != null
@@ -155,9 +159,21 @@ class DogRepository {
           // final dogDocuments = new List<DocumentSnapshot>.from(dogDocuments1.documents.toSet().toList() +
           //     dogDocuments2.documents.toSet().toList());
 
-          final ageFilteredDogDocuments = new List<DocumentSnapshot>.from(dogDocuments.where((profile) => profile.data["dateOfBirth"].toDate().isAfter(maxDate) &&  profile.data["dateOfBirth"].toDate().isBefore(minDate) && profile.data["id"] != currentUser).toList());
+          final ageFilteredDogDocuments = new List<DocumentSnapshot>.from(
+              dogDocuments
+                  .where((profile) =>
+                      profile.data["dateOfBirth"].toDate().isAfter(maxDate) &&
+                      profile.data["dateOfBirth"].toDate().isBefore(minDate) &&
+                      profile.data["id"] != currentUser)
+                  .toList());
 
-          final filteredDogDocuments = new List<DocumentSnapshot>.from(ageFilteredDogDocuments.where((profile) => !profile.data["likes"].contains(currentUser) && !profile.data["treats"].contains(currentUser) && profile.data["owner"] != currentUser).toList());
+          final filteredDogDocuments = new List<DocumentSnapshot>.from(
+              ageFilteredDogDocuments
+                  .where((profile) =>
+                      !profile.data["likes"].contains(currentUser) &&
+                      !profile.data["treats"].contains(currentUser) &&
+                      profile.data["owner"] != currentUser)
+                  .toList());
 
           if (filteredDogDocuments.isNotEmpty) {
             for (DocumentSnapshot dogDocument in filteredDogDocuments) {
@@ -196,32 +212,42 @@ class DogRepository {
   }
 
   Future<List<Profile>> fetchLeaderboardDogs(String breedFilter) async {
-    
     List<Profile> profiles = new List<Profile>();
 
     print("BREED $breedFilter");
 
     try {
-      final dogDocuments = breedFilter != null ? await _firestore.collection("dogs").where("breed", isEqualTo: breedFilter).orderBy("treatCount", descending: true).limit(25).getDocuments() : await _firestore.collection("dogs").orderBy("treatCount", descending: true).limit(25).getDocuments();
+      final dogDocuments = breedFilter != null
+          ? await _firestore
+              .collection("dogs")
+              .where("breed", isEqualTo: breedFilter)
+              .orderBy("treatCount", descending: true)
+              .limit(25)
+              .getDocuments()
+          : await _firestore
+              .collection("dogs")
+              .orderBy("treatCount", descending: true)
+              .limit(25)
+              .getDocuments();
       if (dogDocuments.documents.isNotEmpty) {
         for (DocumentSnapshot dogDocument in dogDocuments.documents) {
           Map<String, dynamic> dogInfo = dogDocument.data;
 
           Profile dogProfile = Profile(
-                name: dogInfo["name"],
-                id: dogInfo["id"],
-                dateOfBirth: dogInfo["dateOfBirth"].toDate(),
-                breed: dogInfo["breed"],
-                bio: dogInfo["bio"],
-                gender: dogInfo["gender"],
-                hobby: dogInfo["hobby"],
-                owner: dogInfo["owner"],
-                photos: dogInfo["photos"],
-                treats: dogInfo["treats"],
-                likeCount: dogInfo["likeCount"],
-                treatCount: dogInfo["treatCount"],
-              );
-          
+            name: dogInfo["name"],
+            id: dogInfo["id"],
+            dateOfBirth: dogInfo["dateOfBirth"].toDate(),
+            breed: dogInfo["breed"],
+            bio: dogInfo["bio"],
+            gender: dogInfo["gender"],
+            hobby: dogInfo["hobby"],
+            owner: dogInfo["owner"],
+            photos: dogInfo["photos"],
+            treats: dogInfo["treats"],
+            likeCount: dogInfo["likeCount"],
+            treatCount: dogInfo["treatCount"],
+          );
+
           profiles.add(dogProfile);
 
           if (profiles.length == dogDocuments.documents.length) {

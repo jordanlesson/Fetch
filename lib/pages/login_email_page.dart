@@ -122,10 +122,11 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
       margin: EdgeInsets.symmetric(
         horizontal: 40.0,
       ),
+      alignment: Alignment.center,
       constraints: BoxConstraints(maxWidth: 350.0),
       child: new TextField(
         autocorrect: false,
-        autofocus: true,
+        // autofocus: true,
         controller: _emailTextController,
         keyboardAppearance: Brightness.light,
         keyboardType: TextInputType.emailAddress,
@@ -193,18 +194,22 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                 return new Scaffold(
                   resizeToAvoidBottomInset: false,
                   appBar: _buildAppBar(state),
-                  body: new FractionallySizedBox(
-                    heightFactor: 1 / 2,
-                    child: new Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        new Expanded(
-                          child: _buildTitle(),
-                        ),
-                        _buildTextField(state),
-                      ],
+                  body: new LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      return new Container(
+                        height: constraints.maxHeight / 2.0,
+                        child: new Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          new Expanded(
+                            child: _buildTitle(),
+                          ),
+                          _buildTextField(state),
+                        ],
                     ),
+                      );
+                    }
                   ),
                 );
               }),

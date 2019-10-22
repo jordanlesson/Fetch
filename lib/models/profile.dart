@@ -52,9 +52,9 @@ List<Profile> demoProfiles = [
 
 class Profile {
   final String id;
-  final String name;
-  final DateTime dateOfBirth;
-  final String breed;
+   String name;
+   DateTime dateOfBirth;
+   String breed;
   final String gender;
   final String owner;
   String bio;

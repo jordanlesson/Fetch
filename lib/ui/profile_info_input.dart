@@ -57,17 +57,18 @@ class _ProfileInfoInputState extends State<ProfileInfoInput> {
         ),
         buildCounter: (BuildContext context,
             {int currentLength, int maxLength, bool isFocused}) {
-          if (maxLength != null) {
+          if (maxLength != null && maxLength > 100) {
             return new Text(
               "${(maxLength - currentLength).toString()}",
               style: TextStyle(
                   color: Colors.black54,
                   fontSize: 17.0,
                   fontFamily: "Proxima Nova",
-                  fontWeight: FontWeight.w500),
+                  fontWeight: FontWeight.w500,
+                  ),
             );
           } else {
-            return new Container();
+            return null;
           }
         },
         decoration: InputDecoration.collapsed(

@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class LoginButton extends StatelessWidget {
 
   final String text;
+  final Color textColor;
+  final List<Color> colors;
   final VoidCallback onPressed;
 
   LoginButton({
     this.text,
+    this.textColor,
     this.onPressed,
+    this.colors,
   });
 
   @override
@@ -21,7 +25,7 @@ class LoginButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30.0),
           gradient: LinearGradient(
-            colors: [
+            colors: colors != null ? colors : [
               Color.fromRGBO(0, 122, 255, 1.0),
               Color.fromRGBO(0, 175, 230, 1.0),
               Color.fromRGBO(0, 255, 230, 1.0),
@@ -33,7 +37,7 @@ class LoginButton extends StatelessWidget {
         child: new Text(
           text.toUpperCase(),
           style: TextStyle(
-              color: Colors.white,
+              color: textColor != null ? textColor : Colors.white,
               fontSize: 18.0,
               fontFamily: "Proxima Nova",
               fontWeight: FontWeight.w600),

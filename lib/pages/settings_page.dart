@@ -666,7 +666,7 @@ class _SettingsPageState extends State<SettingsPage> {
           size: 50.0,
         ),
         new Text(
-          "Version 2.1.3",
+          "Version 2.1.4",
           style: TextStyle(
             color: Colors.black87,
             fontSize: 18.0,

@@ -1,3 +1,4 @@
+import 'package:fetch/pages/onboarding_page.dart';
 import 'package:fetch/pages/owner_account_page.dart';
 import 'package:fetch/ui/gradient_icon.dart';
 import 'package:flutter/material.dart';
@@ -92,43 +93,85 @@ class _StartPageState extends State<StartPage> with TickerProviderStateMixin {
   }
 
   Widget _buildFetchLogo() {
-    return new FractionallySizedBox(
-      heightFactor: 1 / 3,
+    return new SafeArea(
+      top: true,
+      bottom: false,
+    child: new Container(
+      height: 50.0,
       alignment: Alignment.topCenter,
-      child: ShaderMask(
-        shaderCallback: (Rect bounds) {
-          return LinearGradient(
-            colors: [
-              Color.fromRGBO(0, 122, 255, 1.0),
-              Color.fromRGBO(0, 255, 230, 1.0),
-            ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            tileMode: TileMode.mirror,
-          ).createShader(bounds);
-        },
-        child: new Icon(
+      child: 
+      // ShaderMask(
+      //   shaderCallback: (Rect bounds) {
+      //     return LinearGradient(
+      //       colors: [
+      //         Color.fromRGBO(0, 122, 255, 1.0),
+      //         Color.fromRGBO(0, 255, 230, 1.0),
+      //       ],
+      //       begin: Alignment.centerLeft,
+      //       end: Alignment.centerRight,
+      //       tileMode: TileMode.mirror,
+      //     ).createShader(bounds);
+      //   },
+      //   child: 
+        new Icon(
           IconData(0xe900, fontFamily: "fetch"),
-          size: 150.0,
-          color: Colors.white,
+          size: 50.0,
+          color: Colors.black,
           // color: Theme.of(context).primaryColor,
         ),
-      ),
+      // ),
+    ),
     );
   }
 
-  Widget _buildLoginButtons() {
-    return new FractionallySizedBox(
-      alignment: Alignment.bottomCenter,
-      heightFactor: 1 / 3,
-      child: new Container(
-        color: Colors.transparent,
+  Widget _buildLoginButtons(BoxConstraints constraints) {
+    return new Container(
+      height: constraints.maxHeight / 3.5,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        gradient: LinearGradient(
+          colors: [
+            Color.fromRGBO(0, 122, 255, 1.0),
+            Color.fromRGBO(0, 175, 230, 1.0),
+            Color.fromRGBO(0, 255, 230, 1.0),
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            offset: new Offset(0.0, -3.0),
+            blurRadius: 5.0,
+            spreadRadius: 0.0,
+          ),
+        ],
+      ),
+      child: new SafeArea(
+        bottom: true,
+        top: false,
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            new Icon(
+              IconData(0xe900, fontFamily: "fetch"),
+              color: Colors.white,
+              size: 35.0,
+            ),
+            new Divider(
+              color: Colors.transparent,
+              height: 15.0,
+            ),
             new LoginButton(
               text: "LOGIN",
-              onPressed: () {
+              textColor: Theme.of(context).primaryColor,
+              colors: [
+                Colors.white,
+                Colors.white,
+              ],
+              onPressed: 
+              () {
                 Navigator.of(context).push(
                   SlideUpRoute(
                     page: LoginEmailPage(),
@@ -137,10 +180,15 @@ class _StartPageState extends State<StartPage> with TickerProviderStateMixin {
               },
             ),
             new Divider(
-              height: 10.0,
+              height: 15.0,
             ),
             new LoginButton(
               text: "SIGN UP",
+              textColor: Theme.of(context).primaryColor,
+              colors: [
+                Colors.white,
+                Colors.white,
+              ],
               onPressed: () {
                 Navigator.of(context).push(
                   SlideUpRoute(
@@ -158,15 +206,44 @@ class _StartPageState extends State<StartPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: new Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          _buildBackImage(),
-          _buildFrontImage(),
-          _buildLoginButtons(),
-          // _buildFetchLogo(),
-        ],
-      ),
+      backgroundColor: Colors.white,
+      body: new LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+        return new Stack(
+          children: <Widget>[
+            new Column(
+              children: <Widget>[
+                new Expanded(
+                  child: new Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      _buildBackImage(),
+                      _buildFrontImage(),
+                    ],
+                  ),
+                ),
+                new Container(
+                  height: (constraints.maxHeight / 3.5) - 25.0,
+                )
+              ],
+            ),
+            new Positioned(
+              bottom: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: _buildLoginButtons(constraints),
+            ),
+            // new Positioned(
+            //   top: 0.0,
+            //   left: 0.0,
+            //   right: 0.0,
+            //   child: _buildFetchLogo()
+            // ),
+            
+            // _buildFetchLogo(),
+          ],
+        );
+      }),
     );
   }
 }

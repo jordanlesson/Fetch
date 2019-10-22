@@ -7,7 +7,7 @@ class ProfilePhotoCard extends StatefulWidget {
   @override
   _ProfilePhotoCardState createState() => _ProfilePhotoCardState();
 
-  final Uint8List image;
+  final dynamic image;
   final bool isFirstPhoto;
   final VoidCallback onIconPressed;
 
@@ -79,7 +79,9 @@ class _ProfilePhotoCardState extends State<ProfilePhotoCard> {
                       style: BorderStyle.solid,
                     ),
                     image: DecorationImage(
-                        image: new MemoryImage(
+                        image: widget.image is String ? new NetworkImage(
+                          widget.image,
+                        ) : new MemoryImage(
                           widget.image
                         ),
                         fit: BoxFit.cover,

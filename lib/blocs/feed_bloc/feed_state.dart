@@ -6,6 +6,7 @@ import 'package:fetch/models/profile.dart';
 class FeedState {
   final List<Profile> dogs;
   final List<Profile> swipedDogs;
+  final int swipedCount;
   final bool isSuccess;
   final bool isFailure;
   final bool isLoading;
@@ -13,6 +14,7 @@ class FeedState {
   FeedState({
     this.dogs,
     this.swipedDogs,
+    this.swipedCount,
     this.isSuccess,
     this.isFailure,
     this.isLoading,
@@ -25,6 +27,7 @@ class FeedState {
     return FeedState(
       dogs: dogs,
       swipedDogs: swipedDogs,
+      swipedCount: swipedDogs.length,
       isSuccess: false,
       isFailure: false,
       isLoading: true,
@@ -34,10 +37,12 @@ class FeedState {
   FeedState notEmpty({
     List<Profile> dogs,
     List<Profile> swipedDogs,
+    int swipedCount,
   }) {
     return FeedState(
       dogs: dogs,
       swipedDogs: swipedDogs,
+      swipedCount: swipedCount,
       isSuccess: true,
       isFailure: false,
       isLoading: false,
@@ -50,6 +55,7 @@ class FeedState {
     return FeedState(
       dogs: new List<Profile>(),
       swipedDogs: swipedDogs,
+      swipedCount: 0,
       isSuccess: true,
       isFailure: false,
       isLoading: false,
@@ -60,6 +66,7 @@ class FeedState {
     return FeedState(
       dogs: new List<Profile>(),
       swipedDogs: new List<Profile>(),
+      swipedCount: 0,
       isSuccess: false,
       isFailure: false,
       isLoading: true,
@@ -70,6 +77,7 @@ class FeedState {
     return FeedState(
       dogs: new List<Profile>(),
       swipedDogs: new List<Profile>(),
+      swipedCount: 0,
       isSuccess: false,
       isFailure: true,
       isLoading: false,

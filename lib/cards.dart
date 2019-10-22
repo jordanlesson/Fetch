@@ -14,15 +14,17 @@ class CardStack extends StatefulWidget {
   final List<Profile> swipedDogs;
   final String currentUser;
   final Profile currentDog;
+  final int swipedCount;
   final DogRepository _dogRepository;
-  final void Function(SlideDirection) onSlideOutComplete;
-  final void Function(List<Profile>, List<Profile>) onRewindComplete;
+  final void Function(SlideDirection, int) onSlideOutComplete;
+  final void Function(List<Profile>, List<Profile>, int) onRewindComplete;
 
   CardStack(
       {Key key,
       this.currentDog,
       this.profiles,
       this.swipedDogs,
+      this.swipedCount,
       this.currentUser,
       @required DogRepository dogRepository,
       this.onRewindComplete,
@@ -67,7 +69,7 @@ class _CardStackState extends State<CardStack> with TickerProviderStateMixin {
       ..addStatusListener((AnimationStatus status) {
         if (status == AnimationStatus.completed) {
           setState(() {
-            widget.onRewindComplete(widget.profiles, widget.swipedDogs);
+            widget.onRewindComplete(widget.profiles, widget.swipedDogs, widget.swipedCount);
             slideInTween = null;
             _rewindCardOffset = null;
           });
@@ -75,7 +77,6 @@ class _CardStackState extends State<CardStack> with TickerProviderStateMixin {
       });
 
     _frontCard = new Key(widget.profiles[0].id);
-
   }
 
   @override
@@ -92,22 +93,19 @@ class _CardStackState extends State<CardStack> with TickerProviderStateMixin {
   @override
   void dispose() {
     super.dispose();
-    
   }
 
-
   Widget _buildBackCard() {
-
     return widget.profiles.length >= _cardIndex + 2
         ? new Transform(
             transform: Matrix4.identity()
               ..scale(_nextCardScale, _nextCardScale),
             alignment: Alignment.center,
             child: new ProfileCard(
-                profile: widget.profiles[_cardIndex + 1],
-                currentUser: widget.currentUser,
-                currentDog: widget.currentDog,
-                ),
+              profile: widget.profiles[_cardIndex + 1],
+              currentUser: widget.currentUser,
+              currentDog: widget.currentDog,
+            ),
           )
         : new Container();
   }
@@ -181,7 +179,7 @@ class _CardStackState extends State<CardStack> with TickerProviderStateMixin {
                     isDecidable: false,
                     key: _frontCard,
                   ),
-                  _buildDecisionIcon(constraints)
+                  _buildDecisionIcon(constraints),
                 ],
               );
             },
@@ -194,50 +192,12 @@ class _CardStackState extends State<CardStack> with TickerProviderStateMixin {
 
     return widget.profiles.length > 0 && widget.swipedDogs.isNotEmpty
         ? new Opacity(
-          opacity: rewindAnimation.isAnimating ? rewindAnimation.value : 0.0,
-          child: new ProfileCard(
-            profile: widget.swipedDogs.last,
-            currentDog: widget.currentDog,
-            currentUser: widget.currentUser,
-            isDecidable: false,
-          ),
-          )
-        : new Container();
-  }
-
-  Widget _buildRewindButton() {
-    return widget.swipedDogs.isNotEmpty
-        ? Positioned(
-            top: 0.0,
-            left: 0.0,
-            bottom: 0.0,
-            child: new GestureDetector(
-              child: new Container(
-                height: 50.0,
-                width: 50.0,
-                margin: EdgeInsets.only(left: 8.0, bottom: 8.0),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color.fromRGBO(230, 92, 100, 1.0),
-                      Color.fromRGBO(249, 212, 35, 1.0),
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black87,
-                      blurRadius: 10.0,
-                      offset: Offset(0.0, 3.0),
-                    ),
-                  ],
-                  shape: BoxShape.circle,
-                ),
-                child: new Icon(
-                  Icons.undo,
-                  color: Colors.white,
-                ),
-              ),
-              onTap: _onRewindPressed,
+            opacity: rewindAnimation.isAnimating ? rewindAnimation.value : 0.0,
+            child: new ProfileCard(
+              profile: widget.swipedDogs.last,
+              currentDog: widget.currentDog,
+              currentUser: widget.currentUser,
+              isDecidable: false,
             ),
           )
         : new Container();
@@ -308,12 +268,20 @@ class _CardStackState extends State<CardStack> with TickerProviderStateMixin {
             new DraggableCard(
               card: _buildBackCard(),
               isDraggable: false,
+              rewindable: false,
             ),
-            new DraggableCard(
-              card: _buildFrontCard(),
-              slideTo: _desiredSlideOutDirection(),
-              onSlideUpdate: _onSlideUpdate,
-              onSlideOutComplete: widget.onSlideOutComplete,
+            new Stack(
+              children: <Widget>[
+                new DraggableCard(
+                  card: _buildFrontCard(),
+                  slideTo: _desiredSlideOutDirection(),
+                  onSlideUpdate: _onSlideUpdate,
+                  onSlideOutComplete: widget.onSlideOutComplete,
+                  rewindable: widget.swipedDogs.isNotEmpty,
+                  onRewindPressed: _onRewindPressed,
+                  swipedCount: widget.swipedCount,
+                ),
+              ],
             ),
             new Transform.translate(
               offset: _rewindCardOffset != null
@@ -322,9 +290,9 @@ class _CardStackState extends State<CardStack> with TickerProviderStateMixin {
               child: new DraggableCard(
                 isDraggable: false,
                 card: _buildRewindCard(constraints),
+                rewindable: false,
               ),
             ),
-            _buildRewindButton(),
             // new DraggableCard,
             //   card: _buildPreviousCard(),
             //   isDraggable: false,
@@ -347,8 +315,11 @@ class DraggableCard extends StatefulWidget {
   final bool isDraggable;
   final SlideDirection slideTo;
   final Function(Offset cardOffset) onSlideUpdate;
-  final Function(SlideDirection direction) onSlideOutComplete;
+  final Function(SlideDirection direction, int swipedCount) onSlideOutComplete;
   final Function() onRewindComplete;
+  final bool rewindable;
+  final VoidCallback onRewindPressed;
+  final int swipedCount;
 
   DraggableCard({
     this.card,
@@ -357,6 +328,9 @@ class DraggableCard extends StatefulWidget {
     this.onSlideUpdate,
     this.onSlideOutComplete,
     this.onRewindComplete,
+    this.swipedCount,
+    @required this.rewindable,
+    this.onRewindPressed,
   });
 
   @override
@@ -429,7 +403,7 @@ class _DraggableCardState extends State<DraggableCard>
             slideOutTween = null;
             cardOffset = const Offset(0.0, 0.0);
             if (widget.onSlideOutComplete != null) {
-              widget.onSlideOutComplete(slideOutDirection);
+              widget.onSlideOutComplete(slideOutDirection, widget.swipedCount);
             }
           });
         }
@@ -625,6 +599,40 @@ class _DraggableCardState extends State<DraggableCard>
     }
   }
 
+  Widget _buildRewindButton() {
+    return new Align(
+      alignment: Alignment.centerLeft,
+      child: new GestureDetector(
+        child: new Container(
+          height: 50.0,
+          width: 50.0,
+          margin: EdgeInsets.only(left: 8.0, bottom: 8.0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.fromRGBO(230, 92, 100, 1.0),
+                Color.fromRGBO(249, 212, 35, 1.0),
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black87,
+                blurRadius: 10.0,
+                offset: Offset(0.0, 3.0),
+              ),
+            ],
+            shape: BoxShape.circle,
+          ),
+          child: new Icon(
+            Icons.undo,
+            color: Colors.white,
+          ),
+        ),
+        onTap: widget.onRewindPressed,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return new LayoutBuilder(
@@ -635,18 +643,23 @@ class _DraggableCardState extends State<DraggableCard>
                 Matrix4.translationValues(cardOffset.dx, cardOffset.dy, 0.0)
                   ..rotateZ(_rotation(_cardBackgroundRect)),
             origin: _rotationOrigin(_cardBackgroundRect),
-            child: new Container(
-              key: _cardBackgroundKey,
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              padding: EdgeInsets.all(16.0),
-              child: new GestureDetector(
-                key: profileCardKey,
-                onPanStart: _onPanStart,
-                onPanUpdate: _onPanUpdate,
-                onPanEnd: _onPanEnd,
-                child: widget.card,
-              ),
+            child: new Stack(
+              children: <Widget>[
+                new Container(
+                  key: _cardBackgroundKey,
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  padding: EdgeInsets.all(16.0),
+                  child: new GestureDetector(
+                    key: profileCardKey,
+                    onPanStart: _onPanStart,
+                    onPanUpdate: _onPanUpdate,
+                    onPanEnd: _onPanEnd,
+                    child: widget.card,
+                  ),
+                ),
+                widget.rewindable ? _buildRewindButton() : new Container(),
+              ],
             ),
           ),
         );
@@ -764,10 +777,7 @@ class _ProfileCardState extends State<ProfileCard> {
                         new TextSpan(
                           text:
                               Profile().convertDate(widget.profile.dateOfBirth),
-                              
-                              
                           style: TextStyle(
-                            
                             color: Colors.white,
                             fontSize: 30.0,
                             fontFamily: "Proxima Nova",
@@ -845,4 +855,3 @@ class _ProfileCardState extends State<ProfileCard> {
     );
   }
 }
-

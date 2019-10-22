@@ -190,6 +190,8 @@ class _HomePageState extends State<HomePage>
         _feedBloc.dispatch(
           FeedStarted(
             currentUser: widget.user.uid,
+            swipedDogs: _swipedDogs,
+            swipedCount: 0,
           ),
         );
       });
@@ -247,7 +249,7 @@ class _HomePageState extends State<HomePage>
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             new ProfileHeader(
-                dog: state.dogProfile, profileImage: state.profileImage, user: widget.user,),
+                dog: state.dogProfile, profileImage: state.profileImage, user: widget.user, profileBloc: _profileBloc,),
             new Expanded(
               flex: 2,
               child: new ListView(
@@ -347,6 +349,8 @@ class _HomePageState extends State<HomePage>
                           _feedBloc.dispatch(
                             FeedStarted(
                               currentUser: widget.user.uid,
+                              swipedDogs: _swipedDogs,
+                              swipedCount: 0,
                             )
                           );
                         }
@@ -355,7 +359,7 @@ class _HomePageState extends State<HomePage>
                   ),
                   
                   new SideMenuButton(
-                    text: "Report a bug",
+                    text: "Report a problem",
                     icon: Icons.bug_report,
                     onPressed: () {
                       Navigator.of(context).push(
@@ -434,12 +438,13 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  void _onRewindComplete(List<Profile> dogs, List<Profile> swipedDogs) {
+  void _onRewindComplete(List<Profile> dogs, List<Profile> swipedDogs, int swipedCount) {
     _feedBloc.dispatch(
       FeedRewinded(
         dogs: dogs,
         swipedDogs: swipedDogs,
         currentUser: widget.user.uid,
+        swipedCount: swipedCount
       ),
     );
   }
@@ -452,6 +457,7 @@ class _HomePageState extends State<HomePage>
             dogRepository: _dogRepository,
             profiles: state.dogs,
             swipedDogs: state.swipedDogs,
+            swipedCount: state.swipedCount,
             currentDog: currentUser,
             currentUser: widget.user.uid,
             onSlideOutComplete: _onSlideOutComplete,
@@ -539,7 +545,11 @@ class _HomePageState extends State<HomePage>
                   ),
                   onTap: () {
                     _feedBloc.dispatch(
-                      FeedStarted(currentUser: widget.user.uid),
+                      FeedStarted(
+                        currentUser: widget.user.uid,
+                        swipedDogs: _swipedDogs,
+                        swipedCount: state.swipedCount,
+                        ),
                     );
                   },
                 ),
@@ -654,7 +664,11 @@ class _HomePageState extends State<HomePage>
               ),
               onTap: () {
                 _feedBloc.dispatch(
-                  FeedStarted(currentUser: widget.user.uid),
+                  FeedStarted(
+                    currentUser: widget.user.uid,
+                    swipedDogs: _swipedDogs,
+                    swipedCount: 0,
+                    ),
                 );
               },
             ),
@@ -665,7 +679,7 @@ class _HomePageState extends State<HomePage>
     return new Container();
   }
 
-  void _onSlideOutComplete(SlideDirection direction) {
+  void _onSlideOutComplete(SlideDirection direction, int swipedCount) {
     // DogMatch currentMatch = widget.matchEngine.currentMatch;
 
     switch (direction) {
@@ -674,6 +688,7 @@ class _HomePageState extends State<HomePage>
           ProfileDisliked(
             dogs: _dogProfiles,
             swipedDogs: _swipedDogs,
+            swipedCount: swipedCount,
           ),
         );
         break;
@@ -683,6 +698,7 @@ class _HomePageState extends State<HomePage>
             dogs: _dogProfiles,
             currentUser: widget.user.uid,
             swipedDogs: _swipedDogs,
+            swipedCount: swipedCount,
           ),
         );
         break;
@@ -692,6 +708,7 @@ class _HomePageState extends State<HomePage>
             dogs: _dogProfiles,
             currentUser: widget.user.uid,
             swipedDogs: _swipedDogs,
+            swipedCount: swipedCount,
           ),
         );
         break;
@@ -726,11 +743,12 @@ class _HomePageState extends State<HomePage>
                                 currentUser: widget.user.uid,
                                 dogs: state.dogs,
                                 swipedDogs: state.swipedDogs,
+                                swipedCount: state.swipedCount
                               ),
                             );
                           }
-                          if (state.swipedDogs.length % 15 == 0 &&
-                              state.swipedDogs.isNotEmpty) {
+                          if (state.swipedCount % 15 == 0 &&
+                              state.swipedCount != 0) {
                             AdmobInterstitial feedInterstitialAd;
                             feedInterstitialAd = AdmobInterstitial(
                               adUnitId:

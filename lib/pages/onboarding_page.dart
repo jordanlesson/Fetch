@@ -66,7 +66,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ],
                   image: DecorationImage(
                     image: AssetImage(
-                      "assets/dog_photo_3.jpg",
+                      "assets/dog_photo_1.jpg",
                     ),
                     fit: BoxFit.cover,
                   ),
@@ -248,7 +248,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ],
                         image: DecorationImage(
                           image: AssetImage(
-                            "assets/dog_photo_3.jpg",
+                            "assets/dog_photo_2.jpg",
                           ),
                           fit: BoxFit.cover,
                         ),
@@ -336,7 +336,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               shape: BoxShape.circle,
                               image: DecorationImage(
                                 image: AssetImage(
-                                  "assets/dog_photo_3.jpg",
+                                  "assets/dog_photo_0.jpg",
                                 ),
                                 fit: BoxFit.cover,
                               ),

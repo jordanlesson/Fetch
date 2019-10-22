@@ -182,9 +182,11 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   void _updateDogProfile(Profile dogProfile) {
-    _profileBloc.dispatch(
-      ProfileReloadPressed(userID: dogProfile.owner),
-    );
+    Future.delayed(Duration(seconds: 3), () {
+      _profileBloc.dispatch(
+        ProfileReloadPressed(userID: dogProfile.owner),
+      );
+    });
   }
 
   Widget _buildProfileTitle(Profile dogProfile) {
@@ -331,7 +333,6 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   Future<Null> _onSort() async {
-
     SystemChrome.setEnabledSystemUIOverlays([]);
 
     return await showCupertinoModalPopup(
@@ -426,9 +427,8 @@ class _ProfilePageState extends State<ProfilePage>
         );
       },
     ).then((index) {
-
       SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
-      
+
       if (index != null) {
         setState(() {
           sortIndex = index;
@@ -452,15 +452,14 @@ class _ProfilePageState extends State<ProfilePage>
               .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasData) {
+          List<DocumentSnapshot> dogs =
+              List.from(snapshot.data.documents.where((dog) => dog.exists));
 
-          List<DocumentSnapshot> dogs = List.from(snapshot.data.documents.where((dog) => dog.exists));
-          
           return new SliverPadding(
             padding: EdgeInsets.only(bottom: 16.0),
             sliver: new SliverList(
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
-
                   return new Container(
                     height: 450.0,
                     color: Colors.white,
@@ -474,8 +473,8 @@ class _ProfilePageState extends State<ProfilePage>
                                 profile: Profile(
                                   name: dogs[index].data["name"],
                                   id: dogs[index].data["id"],
-                                  dateOfBirth: dogs[index].data["dateOfBirth"]
-                                      .toDate(),
+                                  dateOfBirth:
+                                      dogs[index].data["dateOfBirth"].toDate(),
                                   breed: dogs[index].data["breed"],
                                   bio: dogs[index].data["bio"],
                                   gender: dogs[index].data["gender"],
@@ -523,34 +522,25 @@ class _ProfilePageState extends State<ProfilePage>
                                         currentUser: widget.user.uid,
                                         currentDog: dogProfile,
                                         profile: Profile(
-                                          name: dogs[index].data
-                                              ["name"],
+                                          name: dogs[index].data["name"],
                                           id: dogs[index].data["id"],
                                           dateOfBirth: dogs[index]
                                               .data["dateOfBirth"]
                                               .toDate(),
-                                          breed: dogs[index]
-                                              .data["breed"],
-                                          bio: dogs[index]
-                                              .data["bio"],
-                                          gender: dogs[index]
-                                              .data["gender"],
-                                          hobby: dogs[index]
-                                              .data["hobby"],
-                                          owner: dogs[index]
-                                              .data["owner"],
-                                          photos: dogs[index]
-                                              .data["photos"],
-                                          photoPaths: dogs[index]
-                                              .data["photoPaths"],
-                                          treats: dogs[index]
-                                              .data["treats"],
-                                          likes: dogs[index]
-                                              .data["likes"],
-                                          likeCount: dogs[index]
-                                              .data["likeCount"],
-                                          treatCount: dogs[index]
-                                              .data["treatCount"],
+                                          breed: dogs[index].data["breed"],
+                                          bio: dogs[index].data["bio"],
+                                          gender: dogs[index].data["gender"],
+                                          hobby: dogs[index].data["hobby"],
+                                          owner: dogs[index].data["owner"],
+                                          photos: dogs[index].data["photos"],
+                                          photoPaths:
+                                              dogs[index].data["photoPaths"],
+                                          treats: dogs[index].data["treats"],
+                                          likes: dogs[index].data["likes"],
+                                          likeCount:
+                                              dogs[index].data["likeCount"],
+                                          treatCount:
+                                              dogs[index].data["treatCount"],
                                         ),
                                         visiblePhotoIndex: 0,
                                         isDecidable: true,
@@ -591,8 +581,8 @@ class _ProfilePageState extends State<ProfilePage>
                                   Icons.delete_outline,
                                   color: Colors.black,
                                 ),
-                                onPressed: () => _showDeleteOptions(
-                                    dogs[index].documentID),
+                                onPressed: () =>
+                                    _showDeleteOptions(dogs[index].documentID),
                               ),
                             ],
                           ),
@@ -608,20 +598,10 @@ class _ProfilePageState extends State<ProfilePage>
         } else {
           return new SliverToBoxAdapter(
             child: new Center(
-              child: new Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  new Container(
-                    height: 30.0,
-                    width: 30.0,
-                    margin: EdgeInsets.only(bottom: 5.0),
-                    child: new CircularProgressIndicator(
-                      valueColor: new AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).primaryColor),
-                    ),
-                  ),
-                  new Text(
-                    "Fetching Dogs",
+              child: new Padding(
+                padding: EdgeInsets.all(16.0),
+                  child: new Text(
+                    "No Dogs Found",
                     style: TextStyle(
                       color: Colors.black87,
                       fontSize: 20.0,
@@ -630,17 +610,45 @@ class _ProfilePageState extends State<ProfilePage>
                       fontStyle: FontStyle.italic,
                     ),
                   ),
-                ],
               ),
             ),
           );
-        }
+        } 
+        // else {
+        //   return new SliverToBoxAdapter(
+        //     child: new Center(
+        //       child: new Column(
+        //         mainAxisAlignment: MainAxisAlignment.center,
+        //         children: <Widget>[
+        //           new Container(
+        //             height: 30.0,
+        //             width: 30.0,
+        //             margin: EdgeInsets.only(bottom: 5.0),
+        //             child: new CircularProgressIndicator(
+        //               valueColor: new AlwaysStoppedAnimation<Color>(
+        //                   Theme.of(context).primaryColor),
+        //             ),
+        //           ),
+        //           new Text(
+        //             "Fetching Dogs",
+        //             style: TextStyle(
+        //               color: Colors.black87,
+        //               fontSize: 20.0,
+        //               fontFamily: "Proxima Nova",
+        //               fontWeight: FontWeight.w700,
+        //               fontStyle: FontStyle.italic,
+        //             ),
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //   );
+        // }
       },
     );
   }
 
   void _showDeleteOptions(String userID) async {
-
     SystemChrome.setEnabledSystemUIOverlays([]);
 
     return await showCupertinoDialog(
@@ -887,9 +895,7 @@ class _ProfilePageState extends State<ProfilePage>
                                 _buildProfileImage(dog, state),
                                 _buildProfileTitle(dog),
                                 _buildProfileSubtitle(dog),
-                                dog != null
-                                    ? new Container()
-                                    : _buildAddDog(),
+                                dog != null ? new Container() : _buildAddDog(),
                                 dog != null
                                     ? _buildProfileStatistics(dog)
                                     : new Container(),

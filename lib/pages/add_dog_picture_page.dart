@@ -277,37 +277,36 @@ class _AddDogPicturePageState extends State<AddDogPicturePage> {
                     final decodedPhoto = await decodeImageFromList(photoBytes);
                     print("height: ${decodedPhoto.height}");
                     print("width: ${decodedPhoto.width}");
-                    if (decodedPhoto.height * decodedPhoto.width <=
-                        2048 * 2048) {
+                    // if (decodedPhoto.height * decodedPhoto.width <=
+                    //     2048 * 2048) {
                       final photo = new Uint8List.fromList(photoBytes);
                       _onPhotoSelected(GalleryImage(bytes: photo), photoIndex);
-                    } else {
-                      _scaffoldKey.currentState.showSnackBar(
-                        _buildUploadError(),
-                      );
-                    }
+                    // } else {
+                    //   _scaffoldKey.currentState.showSnackBar(
+                    //     _buildUploadError(),
+                    //   );
+                    // }
                   }
                 }
               });
             } else {
               photoFile = await ImagePicker.pickImage(
                   source: ImageSource.gallery,
-                  maxHeight: 640.0,
-                  maxWidth: 480.0);
+                  );
             }
             if (photoFile != null) {
               final photoBytes = await photoFile.readAsBytes();
               final decodedPhoto = await decodeImageFromList(photoBytes);
               print("height: ${decodedPhoto.height}");
               print("width: ${decodedPhoto.width}");
-              if (decodedPhoto.height * decodedPhoto.width <= 2048 * 2048) {
+              // if (decodedPhoto.height * decodedPhoto.width <= 2048 * 2048) {
                 final photo = new Uint8List.fromList(photoBytes);
                 _onPhotoSelected(GalleryImage(bytes: photo), photoIndex);
-              } else {
-                _scaffoldKey.currentState.showSnackBar(
-                  _buildUploadError(),
-                );
-              }
+              // } else {
+              //   _scaffoldKey.currentState.showSnackBar(
+              //     _buildUploadError(),
+              //   );
+              // }
             }
           },
         );

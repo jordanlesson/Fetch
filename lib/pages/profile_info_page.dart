@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
+import 'package:fetch/pages/dog_breed_page.dart';
 import 'package:fetch/pages/photo_capture_page.dart';
 import 'package:fetch/pages/profile_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:reorderables/reorderables.dart';
+import 'date_of_birth_info_page.dart';
 import 'hobby_info_page.dart';
 import 'photo_gallery_page.dart';
 import 'package:fetch/ui/text_action_button.dart';
@@ -45,7 +48,8 @@ class _ProfileInfoPageState extends State<ProfileInfoPage>
   final UserRepository _userRepository = new UserRepository();
   String hobby;
   String bio;
-  List<Uint8List> photos;
+  List<dynamic> photos;
+  List<dynamic> originalPhotos;
 
   @override
   void initState() {
@@ -53,10 +57,9 @@ class _ProfileInfoPageState extends State<ProfileInfoPage>
 
     tabBarIndex = 0;
 
-    photos = new List<Uint8List>();
-    if (widget.profileImage != null) {
-      photos.add(widget.profileImage);
-    }
+    photos = List<dynamic>.from(widget.profile.photos);
+
+    originalPhotos = List<dynamic>.from(photos);
 
     profile = new Profile(
       hobby: widget.profile.hobby,
@@ -78,7 +81,7 @@ class _ProfileInfoPageState extends State<ProfileInfoPage>
     hobby = profile.hobby;
     bio = profile.bio;
 
-    _fetchDogImages();
+    // _fetchDogImages();
 
     profileTabController = TabController(
       vsync: this,
@@ -87,10 +90,10 @@ class _ProfileInfoPageState extends State<ProfileInfoPage>
     );
   }
 
-  void _fetchDogImages() async {
-    photos = await _userRepository.fetchDogImages(profile);
-    setState(() {});
-  }
+  // void _fetchDogImages() async {
+  //   photos = await _userRepository.fetchDogImages(profile);
+  //   setState(() {});
+  // }
 
   Widget _buildAppBar() {
     return new AppBar(
@@ -115,8 +118,12 @@ class _ProfileInfoPageState extends State<ProfileInfoPage>
                 hobby: hobby,
                 bio: bio,
                 id: profile.id,
+                name: profile.name,
+                breed: profile.breed,
+                dateOfBirth: profile.dateOfBirth,
               ),
               photos,
+              originalPhotos,
             );
             Navigator.of(context).pop();
           },
@@ -186,10 +193,35 @@ class _ProfileInfoPageState extends State<ProfileInfoPage>
     );
   }
 
-  void _onPhotosChanged(List<Uint8List> editedPhotos) {
+  void _onPhotosChanged(List<dynamic> editedPhotos) {
     setState(() {
       photos = editedPhotos;
       profile.photos = photos;
+    });
+  }
+
+  void _onNameChanged(String name) {
+    setState(() {
+      profile.name = name;
+    });
+  }
+
+  void _onBreedChanged(String breed) {
+    setState(() {
+      profile.breed = breed;
+    });
+  }
+
+  void _onDateOfBirthChanged(DateTime dateOfBirth) {
+    setState(() {
+      profile.dateOfBirth = dateOfBirth;
+    });
+  }
+
+  void _onBioChanged(String editedBio) {
+    setState(() {
+      bio = editedBio;
+      profile.bio = bio;
     });
   }
 
@@ -199,13 +231,6 @@ class _ProfileInfoPageState extends State<ProfileInfoPage>
       profile.hobby = hobby;
 
       print("HOBBY: $hobby");
-    });
-  }
-
-  void _onBioChanged(String editedBio) {
-    setState(() {
-      bio = editedBio;
-      profile.bio = bio;
     });
   }
 
@@ -225,8 +250,11 @@ class _ProfileInfoPageState extends State<ProfileInfoPage>
                     hobby: hobby,
                     bio: bio,
                     onPhotosChanged: _onPhotosChanged,
-                    onHobbyChanged: _onHobbyChanged,
+                    onNameChanged: _onNameChanged,
+                    onBreedChanged: _onBreedChanged,
+                    onDateOfBirthChanged: _onDateOfBirthChanged,
                     onBioChanged: _onBioChanged,
+                    onHobbyChanged: _onHobbyChanged,
                   )
                 : ProfilePreviewPage(
                     profile: profile,
@@ -247,10 +275,13 @@ class ProfileEditPage extends StatefulWidget {
   _ProfileEditPageState createState() => _ProfileEditPageState();
 
   final Profile profile;
-  final List<Uint8List> photos;
+  final List<dynamic> photos;
   final String hobby;
   final String bio;
-  final void Function(List<Uint8List>) onPhotosChanged;
+  final void Function(List<dynamic>) onPhotosChanged;
+  final void Function(String) onNameChanged;
+  final void Function(String) onBreedChanged;
+  final void Function(DateTime) onDateOfBirthChanged;
   final void Function(String) onBioChanged;
   final void Function(String) onHobbyChanged;
 
@@ -260,19 +291,22 @@ class ProfileEditPage extends StatefulWidget {
     this.bio,
     this.photos,
     this.onPhotosChanged,
+    this.onNameChanged,
+    this.onBreedChanged,
+    this.onDateOfBirthChanged,
     this.onBioChanged,
     this.onHobbyChanged,
   });
 }
 
 class _ProfileEditPageState extends State<ProfileEditPage> {
-  List<Uint8List> photos;
+  List<dynamic> photos;
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    photos = widget.photos;
+    photos = List<dynamic>.from(widget.photos);
   }
 
   @override
@@ -286,7 +320,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   }
 
   void _onPhotoReordered(int startIndex, int endIndex) {
-    final Uint8List photo = photos[startIndex];
+    final dynamic photo = photos[startIndex];
     final int photosLength = photos.length;
     photos.removeAt(startIndex);
     if (endIndex > photosLength) {
@@ -319,7 +353,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             return new GestureDetector(
               child: new Container(
                 width: (constraints.maxWidth - 30) / 3,
-                height: ((constraints.maxWidth - 30) / 3) * 4 / 3,
+                height: ((constraints.maxWidth - 30) / 3) * (4 / 3),
                 child: new ProfilePhotoCard(
                   image: photos.length >= index + 1 ? photos[index] : null,
                   isFirstPhoto:
@@ -333,29 +367,6 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         );
       },
     );
-    // new GridView.builder(
-    //   padding: EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 10.0),
-    //   shrinkWrap: true,
-    //   physics: NeverScrollableScrollPhysics(),
-    //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-    //     crossAxisCount: 3,
-    //     childAspectRatio: 0.75,
-    //     crossAxisSpacing: 8.0,
-    //     mainAxisSpacing: 0.0,
-    //   ),
-    //   itemBuilder: (BuildContext context, int index) {
-    //     return new GestureDetector(
-    //       child: new ProfilePhotoCard(
-    //         image: photos.length >= index + 1 ? photos[index] : null,
-    //         isFirstPhoto:
-    //             photos.length >= index + 1 && index == 0 ? true : false,
-    //         onIconPressed: () => _handlePhoto(index),
-    //       ),
-    //       onTap: () => _showPhotoOptions(index),
-    //     );
-    //   },
-    //   itemCount: 9,
-    // );
   }
 
   Future<Null> _showPhotoOptions(int photoIndex) async {
@@ -482,37 +493,37 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                     final decodedPhoto = await decodeImageFromList(photoBytes);
                     print("height: ${decodedPhoto.height}");
                     print("width: ${decodedPhoto.width}");
-                    if (decodedPhoto.height * decodedPhoto.width <=
-                        2048 * 2048) {
+                    // if (decodedPhoto.height * decodedPhoto.width <=
+                    //     5000 * 5000) {
                       final photo = new Uint8List.fromList(photoBytes);
                       _onPhotoSelected(GalleryImage(bytes: photo), photoIndex);
-                    } else {
-                      _scaffoldKey.currentState.showSnackBar(
-                        _buildUploadError(),
-                      );
-                    }
+                    // } else {
+                    //   _scaffoldKey.currentState.showSnackBar(
+                    //     _buildUploadError(),
+                    //   );
+                    // }
                   }
                 }
               });
             } else {
               photoFile = await ImagePicker.pickImage(
                   source: ImageSource.gallery,
-                  maxHeight: 640.0,
-                  maxWidth: 480.0);
+                  );
             }
             if (photoFile != null) {
               final photoBytes = await photoFile.readAsBytes();
               final decodedPhoto = await decodeImageFromList(photoBytes);
               print("height: ${decodedPhoto.height}");
               print("width: ${decodedPhoto.width}");
-              if (decodedPhoto.height * decodedPhoto.width <= 2048 * 2048) {
+              // if (decodedPhoto.height * decodedPhoto.width <= 5000 * 5000) {
                 final photo = new Uint8List.fromList(photoBytes);
                 _onPhotoSelected(GalleryImage(bytes: photo), photoIndex);
-              } else {
-                _scaffoldKey.currentState.showSnackBar(
-                  _buildUploadError(),
-                );
-              }
+              // } 
+              // else {
+              //   _scaffoldKey.currentState.showSnackBar(
+              //     _buildUploadError(),
+              //   );
+              // }
             }
           },
         );
@@ -592,6 +603,57 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           children: <Widget>[
             _buildPhotoGrid(),
             ProfileInfoInput(
+              initialText: widget.profile.name,
+              hintText: "",
+              labelText: "NAME",
+              maxHeight: 50.0,
+              maxLength: 30,
+              maxLines: 1,
+              onTextChanged: widget.onNameChanged,
+            ), 
+            new Divider(
+              color: Colors.transparent,
+              height: 10.0,
+            ),  
+            ProfileInfoOptionsButton(
+              labelText: "BREED",
+              hintText: "Select Your Dog's Breed",
+              selectedValue: widget.profile.breed,
+              onPressed: () {
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => new DogBreedPage(),
+                      ),
+                    )
+                    .then((breed) => widget.onBreedChanged(breed));
+              },
+            ),
+            new Divider(
+              color: Colors.transparent,
+              height: 10.0,
+            ),  
+            ProfileInfoOptionsButton(
+              labelText: "DATE OF BIRTH",
+              hintText: "Select Your Dog's Date of Birth",
+              selectedValue: DateFormat("MM/dd/yyyy").format(widget.profile.dateOfBirth),
+              onPressed: () {
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => new DateOfBirthInfoPage(
+                          dateOfBirth: widget.profile.dateOfBirth,
+                        ),
+                      ),
+                    )
+                    .then((dateOfBirth) => widget.onDateOfBirthChanged(dateOfBirth));
+              },
+            ),
+            new Divider(
+              color: Colors.transparent,
+              height: 10.0,
+            ),  
+            ProfileInfoInput(
               initialText: widget.profile.bio,
               hintText: "",
               labelText: "ABOUT MY DOG",
@@ -600,10 +662,14 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               maxLines: null,
               onTextChanged: widget.onBioChanged,
             ),
+            new Divider(
+              color: Colors.transparent,
+              height: 10.0,
+            ),  
             ProfileInfoOptionsButton(
               labelText: "HOBBIES",
               hintText: "Select Your Dog's Favorite Hobby",
-              hobby: widget.hobby,
+              selectedValue: widget.hobby,
               onPressed: () {
                 Navigator.of(context)
                     .push(
@@ -651,13 +717,13 @@ class ProfilePreviewPage extends StatelessWidget {
 class ProfileInfoOptionsButton extends StatelessWidget {
   final String labelText;
   final String hintText;
-  final String hobby;
+  final String selectedValue;
   final VoidCallback onPressed;
 
   ProfileInfoOptionsButton({
     this.labelText,
     this.hintText,
-    this.hobby,
+    this.selectedValue,
     this.onPressed,
   });
 
@@ -678,9 +744,9 @@ class ProfileInfoOptionsButton extends StatelessWidget {
               children: <Widget>[
                 new Expanded(
                   child: new Text(
-                    hobby != null ? hobby : hintText,
+                    selectedValue != null ? selectedValue : hintText,
                     style: TextStyle(
-                      color: hobby != null ? Colors.black : Colors.black45,
+                      color: selectedValue != null ? Colors.black : Colors.black45,
                       fontSize: 17.0,
                       fontFamily: "Proxima Nova",
                       fontWeight: FontWeight.w400,

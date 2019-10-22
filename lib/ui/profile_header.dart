@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:fetch/blocs/profile_bloc/bloc.dart';
 import 'package:fetch/pages/add_dog_info_page.dart';
 import 'package:fetch/pages/profile_info_page.dart';
 import 'package:fetch/models/profile.dart';
@@ -13,27 +14,32 @@ class ProfileHeader extends StatefulWidget {
   final Profile dog;
   final Uint8List profileImage;
   final FirebaseUser user;
+  final ProfileBloc profileBloc;
 
-  ProfileHeader({@required this.dog, this.profileImage, @required this.user});
+  ProfileHeader(
+      {@required this.dog,
+      this.profileImage,
+      @required this.user,
+      @required this.profileBloc});
 
   @override
   _ProfileHeaderState createState() => _ProfileHeaderState();
 }
 
 class _ProfileHeaderState extends State<ProfileHeader> {
-  Widget _buildProfileImage() {
+  Widget _buildProfileImage(BoxConstraints constraints) {
     return new Center(
       child: new GestureDetector(
         child: new Container(
-          height: 140.0,
-          width: 140.0,
+          height: constraints.maxWidth >= 250.0 ? 175.5 : 140.0,
+          width: constraints.maxWidth >= 250.0 ? 175.5 : 140.0,
           child: new Stack(
             alignment: Alignment.center,
             children: <Widget>[
               widget.dog != null
                   ? new Container(
-                      height: 125.0,
-                      width: 125.0,
+                      height: constraints.maxWidth >= 250.0 ? 150.0 : 125.0,
+                      width: constraints.maxWidth >= 250.0 ? 150.0 : 125.0,
                       decoration: BoxDecoration(
                         color: Colors.black,
                         shape: BoxShape.circle,
@@ -46,8 +52,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                       ),
                     )
                   : new Container(
-                      height: 125.0,
-                      width: 125.0,
+                      height: constraints.maxWidth >= 250.0 ? 150.0 : 125.0,
+                      width: constraints.maxWidth >= 250.0 ? 150.0 : 125.0,
                       decoration: BoxDecoration(
                         color: Colors.black12,
                         shape: BoxShape.circle,
@@ -55,23 +61,23 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                       child: new Icon(
                         Icons.person,
                         color: Colors.black38,
-                        size: 50.0,
+                        size: constraints.maxWidth >= 250.0 ? 75.0 : 50.0,
                       ),
                     ),
               widget.dog != null
                   ? new Align(
                       alignment: Alignment.bottomRight,
                       child: new Container(
-                        height: 62.5,
-                        width: 62.5,
+                        height: constraints.maxWidth >= 250.0 ? 75.0 : 62.5,
+                        width: constraints.maxWidth >= 250.0 ? 75.0 : 62.5,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
                         child: new Container(
-                          height: 42.5,
-                          width: 42.5,
+                          height: constraints.maxWidth >= 250.0 ? 55.0 : 62.5,
+                          width: constraints.maxWidth >= 250.0 ? 55.0 : 62.5,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -94,7 +100,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
         ),
         onTap: widget.dog != null
             ? () {
-                Navigator.of(context).push(
+                Navigator.of(context)
+                    .push(
                   SlideUpRoute(
                     page: ProfileInfoPage(
                       currentUser: widget.dog.owner,
@@ -102,7 +109,16 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                       profileImage: widget.profileImage,
                     ),
                   ),
-                );
+                )
+                    .then((_) {
+                  Future.delayed(Duration(seconds: 3), () {
+                    widget.profileBloc.dispatch(
+                      ProfileReloadPressed(
+                        userID: widget.user.uid,
+                      ),
+                    );
+                  });
+                });
               }
             : null,
       ),
@@ -234,26 +250,31 @@ class _ProfileHeaderState extends State<ProfileHeader> {
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            border: widget.dog != null ? Border.all(
-                  width: 0.0,
-                  color: Colors.transparent,
-                ) : Border(
-                bottom: BorderSide(
-                  width: 1.0,
-                  color: Colors.black12,
-                ),
-                ),
+            border: widget.dog != null
+                ? Border.all(
+                    width: 0.0,
+                    color: Colors.transparent,
+                  )
+                : Border(
+                    bottom: BorderSide(
+                      width: 1.0,
+                      color: Colors.black12,
+                    ),
+                  ),
           ),
           padding: EdgeInsets.all(8.0),
-          child: new Column(
-            children: <Widget>[
-              _buildProfileImage(),
-              _buildProfileTitle(),
-              widget.dog != null
-                  ? _buildProfileStatistics()
-                  : new Container(),
-            ],
-          ),
+          child: new LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+            return new Column(
+              children: <Widget>[
+                _buildProfileImage(constraints),
+                _buildProfileTitle(),
+                widget.dog != null
+                    ? _buildProfileStatistics()
+                    : new Container(),
+              ],
+            );
+          }),
         ),
       ),
     );

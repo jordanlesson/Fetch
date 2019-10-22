@@ -39,7 +39,8 @@ class UserRepository {
   //   return user;
   // }
 
-  Future<FirebaseUser> signInWithCredentials(String email, String password) async {
+  Future<FirebaseUser> signInWithCredentials(
+      String email, String password) async {
     final user = await _firebaseAuth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -228,7 +229,8 @@ class UserRepository {
 
       final Map<String, dynamic> dogInfo = preferredAccount != null
           ? dogProfiles.documents
-              .singleWhere((account) => account.documentID == preferredAccount, orElse: () => dogProfiles.documents.first)
+              .singleWhere((account) => account.documentID == preferredAccount,
+                  orElse: () => dogProfiles.documents.first)
               .data
           : dogProfiles.documents.first.data;
       final Profile dogProfile = Profile(
@@ -286,45 +288,128 @@ class UserRepository {
     }
   }
 
-  Future<void> updateDogProfile(
-      Profile dogProfile, List<Uint8List> photos) async {
+  Future<void> updateDogProfile(Profile dogProfile, List<dynamic> photos,
+      List<dynamic> originalPhotos) async {
+    print(photos);
     if (photos.isNotEmpty && photos != null) {
       List photoURLs = new List<dynamic>();
       List photoPaths = new List<String>();
       int photoIndex = 0;
-      for (Uint8List photo in photos) {
+      final List<dynamic> longerPhotoList =
+          originalPhotos.length >= photos.length ? originalPhotos : photos;
+      for (dynamic photo in longerPhotoList) {
         final storageRef = _firebaseStorage
             .ref()
             .child("dogs/${dogProfile.id}/profilePhoto$photoIndex.jpg");
-        photoIndex++;
-        final StorageUploadTask photoUpload = storageRef.putData(photo);
-        final StorageTaskSnapshot storageTask = await photoUpload.onComplete;
-        if (storageTask.bytesTransferred == storageTask.totalByteCount) {
-          final photoURL = await storageRef.getDownloadURL();
-          final photoPath = storageRef.path;
-          photoURLs.add(photoURL);
-          photoPaths.add(photoPath);
-          if (photoURLs.length == photos.length &&
-              photoPaths.length == photos.length) {
-            final DocumentReference dogRef =
-                _firestore.collection("dogs").document("${dogProfile.id}");
-            return _firestore
-                .collection("dogs")
-                .document(dogProfile.id)
-                .updateData({
-              "bio": dogProfile.bio,
-              "hobby": dogProfile.hobby,
-              "photos": photoURLs,
-              "photoPaths": photoPaths,
-            });
+
+        if (photos[photoIndex] is Uint8List) {
+          if (photoIndex + 1 > photos.length) {
+            storageRef.delete();
+          } else {
+            final StorageUploadTask photoUpload =
+                storageRef.putData(photos[photoIndex]);
+            final StorageTaskSnapshot storageTask =
+                await photoUpload.onComplete;
+            if (storageTask.bytesTransferred == storageTask.totalByteCount) {
+              final photoURL = await storageRef.getDownloadURL();
+              final photoPath = storageRef.path;
+              photoURLs.add(photoURL);
+              photoPaths.add(photoPath);
+              if (photoURLs.length == photos.length &&
+                  photoPaths.length == photos.length) {
+                final DocumentReference dogRef =
+                    _firestore.collection("dogs").document("${dogProfile.id}");
+                return _firestore
+                    .collection("dogs")
+                    .document(dogProfile.id)
+                    .updateData({
+                  "name": dogProfile.name,
+                  "breed": dogProfile.breed,
+                  "dateOfBirth": dogProfile.dateOfBirth,
+                  "bio": dogProfile.bio,
+                  "hobby": dogProfile.hobby,
+                  "photos": photoURLs,
+                  "photoPaths": photoPaths,
+                });
+              }
+            }
+          }
+        } else {
+          if (photos[photoIndex] != originalPhotos[photoIndex] &&
+              originalPhotos.contains(photos[photoIndex])) {
+            final int originalPhotoPosition =
+                originalPhotos.indexOf(photos[photoIndex]);
+
+            final originalPhotoRef = _firebaseStorage.ref().child(
+                "dogs/${dogProfile.id}/profilePhoto$originalPhotoPosition.jpg");
+
+            final tempPhoto = await originalPhotoRef.getData(2048 * 2048);
+
+            originalPhotoRef.delete();
+
+            final StorageUploadTask photoUpload = storageRef.putData(tempPhoto);
+            final StorageTaskSnapshot storageTask =
+                await photoUpload.onComplete;
+            if (storageTask.bytesTransferred == storageTask.totalByteCount) {
+              final photoURL = await storageRef.getDownloadURL();
+              final photoPath = storageRef.path;
+              photoURLs.add(photoURL);
+              photoPaths.add(photoPath);
+              if (photoURLs.length == photos.length &&
+                  photoPaths.length == photos.length) {
+                final DocumentReference dogRef =
+                    _firestore.collection("dogs").document("${dogProfile.id}");
+                return _firestore
+                    .collection("dogs")
+                    .document(dogProfile.id)
+                    .updateData({
+                  "name": dogProfile.name,
+                  "breed": dogProfile.breed,
+                  "dateOfBirth": dogProfile.dateOfBirth,
+                  "bio": dogProfile.bio,
+                  "hobby": dogProfile.hobby,
+                  "photos": photoURLs,
+                  "photoPaths": photoPaths,
+                });
+              }
+            }
+          } else {
+            final photoURL = await storageRef.getDownloadURL();
+            final photoPath = storageRef.path;
+            photoURLs.add(photoURL);
+            photoPaths.add(photoPath);
+            if (photoURLs.length == photos.length &&
+                photoPaths.length == photos.length) {
+              final DocumentReference dogRef =
+                  _firestore.collection("dogs").document("${dogProfile.id}");
+              return _firestore
+                  .collection("dogs")
+                  .document(dogProfile.id)
+                  .updateData({
+                "name": dogProfile.name,
+                "breed": dogProfile.breed,
+                "dateOfBirth": dogProfile.dateOfBirth,
+                "bio": dogProfile.bio,
+                "hobby": dogProfile.hobby,
+                "photos": photoURLs,
+                "photoPaths": photoPaths,
+              });
+            }
           }
         }
+        photoIndex++;
       }
     } else {
       return await _firestore
           .collection("dogs")
           .document(dogProfile.id)
-          .updateData({"bio": dogProfile.bio, "hobby": dogProfile.hobby});
+          .updateData({
+        "name": dogProfile.name,
+        "breed": dogProfile.breed,
+        "dateOfBirth": dogProfile.dateOfBirth,
+        "bio": dogProfile.bio,
+        "hobby": dogProfile.hobby
+      });
     }
   }
 

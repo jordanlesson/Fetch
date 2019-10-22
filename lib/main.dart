@@ -16,8 +16,10 @@ import 'simple_bloc_delegate.dart';
 import 'package:admob_flutter/admob_flutter.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   Admob.initialize("ca-app-pub-7132470146221772~7776821395");
   BlocSupervisor().delegate = SimpleBlocDelegate();
+  
   runApp(Fetch());
 }
 
