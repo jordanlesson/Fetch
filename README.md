@@ -1,16 +1,4 @@
-# fetch
+# Fetch - Discover Cute Dogs
 
-A new Flutter project.
+Fetch is a fun and simple way to discover cute and lovable dogs around the world! Begin by providing the necessary information to create a profile for your dog. Then, start swiping! Swipe right to like a dog or swipe left to pass. Swipe up to give the dog a very special treat. Additionally, feel free to message any dogs you see in the feed. Welcome to the best social platform for you four-legged friends!
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
